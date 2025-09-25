@@ -1,0 +1,248 @@
+// HealthApp Database Schema v0
+// MVP веб-сервиса для поиска специалистов здоровья
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===== ENUMS =====
+enum UserRole {
+  CLIENT
+  SPECIALIST
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  DELETED
+}
+
+enum PreferredFormat {
+  ONLINE
+  OFFLINE
+  ANY
+}
+
+enum RequestStatus {
+  OPEN
+  MATCHED
+  CLOSED
+  CANCELLED
+}
+
+enum ApplicationStatus {
+  SENT
+  ACCEPTED
+  DECLINED
+}
+
+// ===== CORE TABLES =====
+
+model User {
+  id            String     @id @default(cuid())
+  email         String     @unique
+  phone         String?
+  passwordHash  String
+  role          UserRole
+  status        UserStatus @default(ACTIVE)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  // Relations
+  clientProfile     ClientProfile?
+  specialistProfile SpecialistProfile?
+  requests          Request[]
+  applications      Application[]
+  chatThreadsAsClient     ChatThread[] @relation("ClientThreads")
+  chatThreadsAsSpecialist ChatThread[] @relation("SpecialistThreads")
+  chatMessages      ChatMessage[]
+  specialistCategories SpecialistCategory[]
+  
+  // NextAuth relations
+  accounts Account[]
+  sessions Session[]
+
+  @@map("users")
+}
+
+model ClientProfile {
+  userId      String  @id
+  displayName String
+  city        String?
+  about       String?
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("client_profiles")
+}
+
+model SpecialistProfile {
+  userId         String  @id
+  displayName    String
+  bio            String
+  experienceYears Int
+  priceMinCents  Int?
+  priceMaxCents  Int?
+  currency       String  @default("USD")
+  onlineOnly     Boolean @default(false)
+  city           String?
+  verified       Boolean @default(false)
+  createdAt      DateTime @default(now())
+
+  // Relations
+  user       User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("specialist_profiles")
+}
+
+model Category {
+  id       String @id @default(cuid())
+  slug     String @unique
+  name     String
+  isActive Boolean @default(true)
+
+  // Relations
+  specialists SpecialistCategory[]
+  requests    Request[]
+
+  @@map("categories")
+}
+
+model SpecialistCategory {
+  specialistUserId String
+  categoryId       String
+
+  // Relations
+  specialist User     @relation(fields: [specialistUserId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([specialistUserId, categoryId])
+  @@map("specialist_categories")
+}
+
+model Request {
+  id                String         @id @default(cuid())
+  clientUserId      String
+  categoryId        String
+  title             String
+  description       String
+  preferredFormat   PreferredFormat
+  budgetMinCents    Int?
+  budgetMaxCents    Int?
+  city              String?
+  status            RequestStatus  @default(OPEN)
+  createdAt         DateTime       @default(now())
+
+  // Relations
+  client        User          @relation(fields: [clientUserId], references: [id], onDelete: Cascade)
+  category      Category      @relation(fields: [categoryId], references: [id])
+  applications  Application[]
+  chatThreads   ChatThread[]
+
+  @@map("requests")
+}
+
+model Application {
+  id              String            @id @default(cuid())
+  requestId       String
+  specialistUserId String
+  message         String
+  status          ApplicationStatus @default(SENT)
+  createdAt       DateTime          @default(now())
+
+  // Relations
+  request     Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  specialist  User    @relation(fields: [specialistUserId], references: [id], onDelete: Cascade)
+
+  @@map("applications")
+}
+
+model ChatThread {
+  id               String    @id @default(cuid())
+  clientUserId     String
+  specialistUserId String
+  requestId        String?
+  createdAt        DateTime  @default(now())
+  lastMessageAt    DateTime  @default(now())
+
+  // Relations
+  client     User          @relation("ClientThreads", fields: [clientUserId], references: [id], onDelete: Cascade)
+  specialist User          @relation("SpecialistThreads", fields: [specialistUserId], references: [id], onDelete: Cascade)
+  request    Request?      @relation(fields: [requestId], references: [id], onDelete: SetNull)
+  messages   ChatMessage[]
+
+  @@unique([clientUserId, specialistUserId, requestId])
+  @@map("chat_threads")
+}
+
+model ChatMessage {
+  id            String    @id @default(cuid())
+  threadId      String
+  senderUserId  String
+  body          String
+  attachmentUrl String?
+  isRead        Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+
+  // Relations
+  thread  ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  sender  User       @relation(fields: [senderUserId], references: [id], onDelete: Cascade)
+
+  @@map("chat_messages")
+}
+
+// ===== NEXTAUTH MODELS =====
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ===== INDEXES =====
+// Prisma автоматически создает индексы для @id, @unique, @relation
+// Дополнительные индексы для производительности:
+
+// specialist_categories(category_id, specialist_user_id) - для поиска специалистов по категории
+// specialist_profiles(city, online_only, experience_years, price_min_cents, price_max_cents) - для фильтрации
+// requests(category_id, status, city) - для поиска заявок
+// chat_messages(thread_id, created_at) - для сортировки сообщений

@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HealthApp - MVP веб-сервиса для поиска специалистов здоровья
 
-## Getting Started
+## 🏗️ Архитектура
 
-First, run the development server:
+- **Frontend**: Next.js 14 + App Router + TypeScript + Tailwind CSS
+- **Backend**: Next.js API Routes + Prisma ORM
+- **Database**: PostgreSQL (локально, потом Railway)
+- **Authentication**: NextAuth.js с сессионными cookies
+- **Real-time**: Socket.IO (будет добавлен позже)
 
+## 📊 Схема БД v0
+
+### Основные таблицы:
+- `users` - пользователи (клиенты, специалисты, админы)
+- `client_profiles` - профили клиентов
+- `specialist_profiles` - профили специалистов
+- `categories` - категории специалистов
+- `specialist_categories` - связи специалистов с категориями
+- `requests` - заявки клиентов
+- `applications` - отклики специалистов
+- `chat_threads` - треды чатов
+- `chat_messages` - сообщения в чатах
+
+### Ключевые особенности:
+- Цены хранятся в центах (USD)
+- Прямой чат без заявки (request_id = NULL)
+- Уникальность тредов: (client, specialist, request_id)
+- Город обязателен для offline формата
+
+## 🚀 Запуск проекта
+
+### 1. Установка зависимостей
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Настройка базы данных
+```bash
+# Создать локальную PostgreSQL БД
+createdb healthapp
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# Применить схему
+npm run db:push
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Заполнить начальными данными
+npm run db:seed
+```
 
-## Learn More
+### 3. Запуск в режиме разработки
+```bash
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+## 🧪 Тестирование аутентификации
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Сценарий ручного теста:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **Откройте** http://localhost:3000
+2. **Нажмите** "Зарегистрироваться"
+3. **Заполните форму:**
+   - Email: test@example.com
+   - Пароль: password123
+   - Имя: Тест Пользователь
+4. **Нажмите** "Зарегистрироваться"
+5. **Перейдите** на страницу входа
+6. **Войдите** с теми же данными
+7. **Проверьте** доступ к /app (должен быть редирект)
+8. **Нажмите** "Выйти" и проверьте редирект
 
-## Deploy on Vercel
+### Ожидаемый результат:
+- ✅ Регистрация создает пользователя и client_profile
+- ✅ Вход работает с email/паролем
+- ✅ Сессия сохраняется в БД
+- ✅ /app защищен от неавторизованных
+- ✅ Пароль хранится в виде bcrypt-хеша
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📝 Доступные скрипты
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `npm run dev` - запуск в режиме разработки
+- `npm run build` - сборка для продакшена
+- `npm run start` - запуск продакшен сборки
+- `npm run db:generate` - генерация Prisma Client
+- `npm run db:push` - применение схемы к БД
+- `npm run db:migrate` - создание миграций
+- `npm run db:seed` - заполнение БД тестовыми данными
+
+## 🔧 Настройка
+
+Скопируйте `.env.local` и настройте переменные окружения:
+
+```env
+DATABASE_URL="postgresql://postgres:password@localhost:5432/healthapp?schema=public"
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="your-secret-key-here"
+```
+
+## 📋 Следующие шаги
+
+1. ✅ Схема БД v0 готова
+2. ⏳ Настройка NextAuth.js
+3. ⏳ API для регистрации/авторизации
+4. ⏳ Каталог специалистов с фильтрами
+5. ⏳ Система заявок и откликов
+6. ⏳ Встроенный чат
