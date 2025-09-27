@@ -8,6 +8,7 @@ export interface SpecialistCard {
   experienceYears: number
   categories: string[]
   verified: boolean
+  avatarUrl: string | null
 }
 
 export interface SpecialistsResponse {
@@ -45,5 +46,6 @@ export interface SpecialistProfile {
   priceMaxCents: number | null
   categories: SpecialistCategory[]
   verified: boolean
+  avatarUrl: string | null
   createdAt: string
 }

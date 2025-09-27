@@ -7,28 +7,176 @@ import ErrorState from '@/components/ErrorState';
 import SpecialistsFilters from '@/components/SpecialistsFilters';
 import PaginationWrapper from '@/components/PaginationWrapper';
 import Link from 'next/link';
+import { prisma } from '@/lib/prisma';
+import { z } from 'zod';
 
-// Функция для получения данных специалистов
+// Zod schema для параметров поиска
+const specialistSearchParamsSchema = z.object({
+  category: z.string().optional(),
+  format: z.enum(['online', 'offline', 'any']).default('any'),
+  city: z.string().optional(),
+  minExp: z.string().transform(Number).optional(),
+  priceMin: z.string().transform(Number).optional(),
+  priceMax: z.string().transform(Number).optional(),
+  q: z.string().optional(),
+  verifiedOnly: z.string().transform(val => val === 'true').default('true'),
+  sort: z.enum(['recent', 'price_asc', 'price_desc']).default('recent'),
+  limit: z.string().transform(Number).default('20'),
+  offset: z.string().transform(Number).default('0'),
+});
+
+// Функция для получения данных специалистов через Prisma
 async function getSpecialists(searchParams: Promise<{ [key: string]: string | string[] | undefined }>): Promise<GetSpecialistsResponse> {
   const resolvedParams = await searchParams;
-  const params = new URLSearchParams();
-  
-  // Добавляем параметры поиска
-  Object.entries(resolvedParams).forEach(([key, value]) => {
-    if (value !== undefined && value !== '') {
-      params.append(key, String(value));
-    }
-  });
+  const params = Object.fromEntries(
+    Object.entries(resolvedParams).filter(([_, value]) => value !== undefined && value !== '')
+  );
 
-  const response = await fetch(`${process.env.NEXTAUTH_URL}/api/specialists?${params.toString()}`, {
-    cache: 'no-store' // Всегда получаем свежие данные
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch specialists');
+  const validatedParams = specialistSearchParamsSchema.safeParse(params);
+  if (!validatedParams.success) {
+    throw new Error('Неверные параметры запроса');
   }
 
-  return response.json();
+  const limit = validatedParams.data.limit;
+  const offset = validatedParams.data.offset;
+
+  const where: any = {
+    role: 'SPECIALIST',
+    status: 'ACTIVE',
+  };
+
+  // Применяем фильтры
+  if (validatedParams.data.category) {
+    where.specialistCategories = {
+      some: {
+        category: {
+          slug: validatedParams.data.category
+        }
+      }
+    };
+  }
+
+  // Создаем объект для фильтров specialistProfile
+  const specialistProfileFilters: any = {};
+
+  if (validatedParams.data.format === 'online') {
+    specialistProfileFilters.onlineOnly = true;
+  } else if (validatedParams.data.format === 'offline') {
+    specialistProfileFilters.onlineOnly = false;
+    if (validatedParams.data.city) {
+      specialistProfileFilters.city = validatedParams.data.city;
+    }
+  }
+
+  if (validatedParams.data.minExp !== undefined) {
+    specialistProfileFilters.experienceYears = {
+      gte: validatedParams.data.minExp
+    };
+  }
+
+  if (validatedParams.data.priceMin !== undefined || validatedParams.data.priceMax !== undefined) {
+    specialistProfileFilters.AND = [];
+    if (validatedParams.data.priceMin !== undefined) {
+      specialistProfileFilters.AND.push({
+        priceMinCents: {
+          gte: validatedParams.data.priceMin
+        }
+      });
+    }
+    if (validatedParams.data.priceMax !== undefined) {
+      specialistProfileFilters.AND.push({
+        priceMaxCents: {
+          lte: validatedParams.data.priceMax
+        }
+      });
+    }
+  }
+
+  if (validatedParams.data.verifiedOnly) {
+    specialistProfileFilters.verified = true;
+  }
+
+  // Применяем фильтры specialistProfile
+  where.specialistProfile = {
+    is: {
+      ...specialistProfileFilters
+    }
+  };
+
+  if (validatedParams.data.q) {
+    where.OR = [
+      {
+        specialistProfile: {
+          displayName: {
+            contains: validatedParams.data.q,
+            mode: 'insensitive'
+          }
+        }
+      },
+      {
+        specialistProfile: {
+          bio: {
+            contains: validatedParams.data.q,
+            mode: 'insensitive'
+          }
+        }
+      }
+    ];
+  }
+
+  // Определяем сортировку
+  let orderBy: any = {
+    specialistProfile: {
+      createdAt: 'desc'
+    }
+  };
+
+  if (validatedParams.data.sort === 'price_asc') {
+    orderBy = {
+      specialistProfile: {
+        priceMinCents: 'asc'
+      }
+    };
+  } else if (validatedParams.data.sort === 'price_desc') {
+    orderBy = {
+      specialistProfile: {
+        priceMinCents: 'desc'
+      }
+    };
+  }
+
+  const specialists = await prisma.user.findMany({
+    where,
+    skip: Number(offset),
+    take: Number(limit),
+    include: {
+      specialistProfile: true,
+      specialistCategories: {
+        include: {
+          category: true
+        }
+      }
+    },
+    orderBy
+  });
+
+  const total = await prisma.user.count({ where });
+
+  // Преобразование в формат SpecialistCard
+  const items = specialists.map(specialist => ({
+    id: specialist.id,
+    displayName: specialist.specialistProfile!.displayName,
+    city: specialist.specialistProfile!.city,
+    onlineOnly: specialist.specialistProfile!.onlineOnly,
+    priceMinCents: specialist.specialistProfile!.priceMinCents,
+    priceMaxCents: specialist.specialistProfile!.priceMaxCents,
+    experienceYears: specialist.specialistProfile!.experienceYears,
+    categories: specialist.specialistCategories.map(sc => sc.category.slug),
+    verified: specialist.specialistProfile!.verified,
+    avatarUrl: specialist.specialistProfile!.avatarUrl
+  }));
+
+  return { items, total };
 }
 
 // Компонент списка специалистов
@@ -77,7 +225,6 @@ async function SpecialistsList({ searchParams }: { searchParams: Promise<{ [key:
       <ErrorState
         title="Ошибка загрузки"
         description="Не удалось загрузить список специалистов. Попробуйте обновить страницу."
-        onRetry={() => window.location.reload()}
       />
     );
   }

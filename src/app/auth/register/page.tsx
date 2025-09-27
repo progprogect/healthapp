@@ -92,7 +92,7 @@ export default function RegisterPage() {
                 id="displayName"
                 name="displayName"
                 type="text"
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="mt-1"
                 placeholder="Ваше имя"
                 value={formData.displayName}
                 onChange={handleChange}
@@ -108,7 +108,7 @@ export default function RegisterPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="mt-1"
                 placeholder="Email адрес"
                 value={formData.email}
                 onChange={handleChange}
@@ -124,7 +124,7 @@ export default function RegisterPage() {
                 type="password"
                 autoComplete="new-password"
                 required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="mt-1"
                 placeholder="Минимум 8 символов"
                 value={formData.password}
                 onChange={handleChange}
@@ -140,7 +140,7 @@ export default function RegisterPage() {
                 type="password"
                 autoComplete="new-password"
                 required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="mt-1"
                 placeholder="Повторите пароль"
                 value={formData.confirmPassword}
                 onChange={handleChange}
@@ -156,7 +156,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+              className="btn btn-primary w-full disabled:opacity-50"
             >
               {loading ? "Регистрация..." : "Зарегистрироваться"}
             </button>

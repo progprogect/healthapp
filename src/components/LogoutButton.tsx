@@ -6,7 +6,7 @@ import Providers from "./Providers"
 function LogoutButtonForm() {
   return (
     <button
-      onClick={() => signOut({ callbackUrl: "/" })}
+      onClick={() => signOut({ callbackUrl: "http://localhost:3001/" })}
       className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
     >
       Выйти

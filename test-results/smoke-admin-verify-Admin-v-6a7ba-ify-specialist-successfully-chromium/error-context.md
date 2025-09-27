@@ -1,0 +1,50 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e6]:
+        - link "HealthApp" [ref=e8] [cursor=pointer]:
+          - /url: /
+        - navigation [ref=e9]:
+          - link "Каталог" [ref=e10] [cursor=pointer]:
+            - /url: /specialists
+          - link "Войти" [ref=e11] [cursor=pointer]:
+            - /url: /auth/login
+          - link "Регистрация" [ref=e12] [cursor=pointer]:
+            - /url: /auth/register
+    - main [ref=e14]:
+      - generic [ref=e18]:
+        - generic [ref=e19]:
+          - heading "Управление специалистами" [level=1] [ref=e20]
+          - paragraph [ref=e21]: Верификация и модерация профилей специалистов
+        - generic [ref=e23]:
+          - generic [ref=e24]:
+            - generic [ref=e25]: Поиск по имени или email
+            - textbox "Поиск по имени или email" [active] [ref=e26]: spec@test.io
+          - generic [ref=e27]:
+            - generic [ref=e28]: Статус верификации
+            - combobox "Статус верификации" [ref=e29]:
+              - option "Все" [selected]
+              - option "Верифицированные"
+              - option "Не верифицированные"
+          - button "Сбросить фильтры" [ref=e31]
+        - generic [ref=e32]:
+          - heading "Специалисты (0)" [level=2] [ref=e34]
+          - paragraph [ref=e36]: Специалисты не найдены
+      - generic [ref=e39]:
+        - generic [ref=e40]: © 2024 HealthApp. Все права защищены.
+        - generic [ref=e41]:
+          - link "Политика конфиденциальности" [ref=e42] [cursor=pointer]:
+            - /url: /privacy
+          - link "Условия использования" [ref=e43] [cursor=pointer]:
+            - /url: /terms
+          - link "Контакты" [ref=e44] [cursor=pointer]:
+            - /url: /contact
+    - region "Notifications alt+T"
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e50] [cursor=pointer]:
+    - img [ref=e51] [cursor=pointer]
+  - alert [ref=e54]
+```

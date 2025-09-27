@@ -1,0 +1,41 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e6] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e7] [cursor=pointer]:
+      - img [ref=e8] [cursor=pointer]
+    - generic [ref=e11] [cursor=pointer]:
+      - button "Open issues overlay" [ref=e12] [cursor=pointer]:
+        - generic [ref=e13] [cursor=pointer]:
+          - generic [ref=e14] [cursor=pointer]: "0"
+          - generic [ref=e15] [cursor=pointer]: "1"
+        - generic [ref=e16] [cursor=pointer]: Issue
+      - button "Collapse issues badge" [ref=e17] [cursor=pointer]:
+        - img [ref=e18] [cursor=pointer]
+  - generic [ref=e21]:
+    - banner [ref=e22]:
+      - generic [ref=e24]:
+        - link "HealthApp" [ref=e26] [cursor=pointer]:
+          - /url: /
+        - navigation [ref=e27]
+    - main [ref=e31]:
+      - generic [ref=e37]:
+        - heading "Добро пожаловать в HealthApp!" [level=2] [ref=e38]
+        - paragraph [ref=e39]: Вы успешно вошли в систему.
+        - generic [ref=e40]:
+          - paragraph [ref=e41]: ✅ Аутентификация работает!
+          - paragraph [ref=e42]: "Роль: CLIENT | Email: test@example.com"
+      - generic [ref=e45]:
+        - generic [ref=e46]: © 2024 HealthApp. Все права защищены.
+        - generic [ref=e47]:
+          - link "Политика конфиденциальности" [ref=e48] [cursor=pointer]:
+            - /url: /privacy
+          - link "Условия использования" [ref=e49] [cursor=pointer]:
+            - /url: /terms
+          - link "Контакты" [ref=e50] [cursor=pointer]:
+            - /url: /contact
+    - region "Notifications alt+T"
+  - region "Notifications alt+T"
+  - alert [ref=e51]
+```

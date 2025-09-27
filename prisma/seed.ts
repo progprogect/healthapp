@@ -263,6 +263,116 @@ async function main() {
   }
 
   console.log('✅ Specialists seeded successfully!')
+
+  console.log('🌱 Seeding admin...')
+  
+  // Создаем админа
+  const adminPasswordHash = await hash('admin123', 12)
+  await prisma.user.upsert({
+    where: { email: 'admin@healthapp.com' },
+    update: {},
+    create: {
+      email: 'admin@healthapp.com',
+      passwordHash: adminPasswordHash,
+      role: 'ADMIN',
+      status: 'ACTIVE',
+    }
+  })
+
+  console.log('✅ Admin seeded successfully!')
+  
+  await seedRequests()
+}
+
+async function seedRequests() {
+  try {
+    console.log('🌱 Seeding requests...')
+
+    // Найдем клиента для создания заявок
+    const client = await prisma.user.findFirst({
+      where: { role: 'CLIENT' },
+      include: { clientProfile: true }
+    })
+
+    if (!client) {
+      console.log('⚠️ No client found, skipping requests seeding')
+      return
+    }
+
+    // Найдем категории
+    const categories = await prisma.category.findMany()
+
+    const requests = [
+      {
+        title: 'Нужна помощь с тревожностью',
+        description: 'Ищу психолога для работы с тревожными расстройствами. Предпочтительно онлайн консультации, так как живу в небольшом городе.',
+        preferredFormat: 'ONLINE' as const,
+        categorySlug: 'psychologist',
+        budgetMinCents: 5000,
+        budgetMaxCents: 8000
+      },
+      {
+        title: 'Консультация по питанию',
+        description: 'Хочу составить план питания для похудения. Готова к очным встречам в Москве.',
+        preferredFormat: 'OFFLINE' as const,
+        city: 'Москва',
+        categorySlug: 'nutritionist',
+        budgetMinCents: 3000,
+        budgetMaxCents: 5000
+      },
+      {
+        title: 'Персональные тренировки',
+        description: 'Ищу персонального тренера для занятий в спортзале. Опыт работы с травмами колена обязателен.',
+        preferredFormat: 'OFFLINE' as const,
+        city: 'Санкт-Петербург',
+        categorySlug: 'personal-trainer',
+        budgetMinCents: 4000,
+        budgetMaxCents: 6000
+      },
+      {
+        title: 'Коучинг по здоровому образу жизни',
+        description: 'Нужен коуч для комплексного подхода к здоровому образу жизни. Готов к любым форматам работы.',
+        preferredFormat: 'ANY' as const,
+        categorySlug: 'health-coach',
+        budgetMinCents: 6000,
+        budgetMaxCents: 10000
+      },
+      {
+        title: 'Восстановление после травмы',
+        description: 'Требуется физиотерапевт для восстановления после спортивной травмы плеча.',
+        preferredFormat: 'OFFLINE' as const,
+        city: 'Москва',
+        categorySlug: 'physiotherapist',
+        budgetMinCents: 4000,
+        budgetMaxCents: 7000
+      }
+    ]
+
+    for (const requestData of requests) {
+      const category = categories.find(cat => cat.slug === requestData.categorySlug)
+      
+      if (category) {
+        await prisma.request.create({
+          data: {
+            clientUserId: client.id,
+            categoryId: category.id,
+            title: requestData.title,
+            description: requestData.description,
+            preferredFormat: requestData.preferredFormat,
+            city: requestData.city,
+            budgetMinCents: requestData.budgetMinCents,
+            budgetMaxCents: requestData.budgetMaxCents,
+            status: 'OPEN'
+          }
+        })
+      }
+    }
+
+    console.log('✅ Requests seeded successfully!')
+  } catch (e) {
+    console.error('❌ Error seeding requests:', e)
+    throw e
+  }
 }
 
 main()

@@ -166,7 +166,8 @@ export async function GET(request: Request) {
       priceMaxCents: specialist.specialistProfile!.priceMaxCents,
       experienceYears: specialist.specialistProfile!.experienceYears,
       categories: specialist.specialistCategories.map(sc => sc.category.slug),
-      verified: specialist.specialistProfile!.verified
+      verified: specialist.specialistProfile!.verified,
+      avatarUrl: specialist.specialistProfile!.avatarUrl
     }));
 
     return NextResponse.json({ items, total }, { status: 200 });

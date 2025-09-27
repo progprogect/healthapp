@@ -151,7 +151,7 @@ export default function SpecialistsFilters() {
       <div className="lg:hidden mb-4">
         <button
           onClick={() => setIsMobileFiltersOpen(true)}
-          className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+          className="btn btn-secondary w-full"
         >
           <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z" />
@@ -180,7 +180,7 @@ export default function SpecialistsFilters() {
               placeholder="Поиск по имени или специализации..."
               value={filters.q}
               onChange={(e) => handleFilterChange('q', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+className=""
             />
           </FilterSection>
 
@@ -189,7 +189,7 @@ export default function SpecialistsFilters() {
             <select
               value={filters.category}
               onChange={(e) => handleFilterChange('category', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+className=""
             >
               {CATEGORIES.map((cat) => (
                 <option key={cat.value} value={cat.value}>
@@ -214,7 +214,7 @@ export default function SpecialistsFilters() {
                     value={option.value}
                     checked={filters.format === option.value}
                     onChange={(e) => handleFilterChange('format', e.target.value)}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+className=""
                   />
                   <span className="ml-2 text-sm text-gray-700">{option.label}</span>
                 </label>
@@ -228,7 +228,7 @@ export default function SpecialistsFilters() {
               <select
                 value={filters.city}
                 onChange={(e) => handleFilterChange('city', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  className=""
               >
                 {CITIES.map((city) => (
                   <option key={city.value} value={city.value}>
@@ -247,7 +247,7 @@ export default function SpecialistsFilters() {
               placeholder="От"
               value={filters.minExp}
               onChange={(e) => handleFilterChange('minExp', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+className=""
             />
           </FilterSection>
 
@@ -260,7 +260,7 @@ export default function SpecialistsFilters() {
                 placeholder="От"
                 value={filters.priceMin}
                 onChange={(e) => handleFilterChange('priceMin', e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  className=""
               />
               <input
                 type="number"
@@ -268,7 +268,7 @@ export default function SpecialistsFilters() {
                 placeholder="До"
                 value={filters.priceMax}
                 onChange={(e) => handleFilterChange('priceMax', e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  className=""
               />
             </div>
           </FilterSection>
@@ -282,7 +282,7 @@ export default function SpecialistsFilters() {
               id="verifiedOnly"
               checked={filters.verifiedOnly}
               onChange={(e) => handleFilterChange('verifiedOnly', e.target.checked)}
-              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+className=""
             />
             <label htmlFor="verifiedOnly" className="ml-2 text-sm text-gray-700">
               Только верифицированные специалисты
@@ -318,7 +318,7 @@ export default function SpecialistsFilters() {
                       placeholder="Поиск по имени или специализации..."
                       value={filters.q}
                       onChange={(e) => handleFilterChange('q', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        className=""
                     />
                   </FilterSection>
 
@@ -327,7 +327,7 @@ export default function SpecialistsFilters() {
                     <select
                       value={filters.category}
                       onChange={(e) => handleFilterChange('category', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        className=""
                     >
                       {CATEGORIES.map((cat) => (
                         <option key={cat.value} value={cat.value}>
@@ -352,7 +352,7 @@ export default function SpecialistsFilters() {
                             value={option.value}
                             checked={filters.format === option.value}
                             onChange={(e) => handleFilterChange('format', e.target.value)}
-                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+        className=""
                           />
                           <span className="ml-2 text-sm text-gray-700">{option.label}</span>
                         </label>
@@ -366,7 +366,7 @@ export default function SpecialistsFilters() {
                       <select
                         value={filters.city}
                         onChange={(e) => handleFilterChange('city', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className=""
                       >
                         {CITIES.map((city) => (
                           <option key={city.value} value={city.value}>
@@ -385,7 +385,7 @@ export default function SpecialistsFilters() {
                       placeholder="От"
                       value={filters.minExp}
                       onChange={(e) => handleFilterChange('minExp', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        className=""
                     />
                   </FilterSection>
 
@@ -398,7 +398,7 @@ export default function SpecialistsFilters() {
                         placeholder="От"
                         value={filters.priceMin}
                         onChange={(e) => handleFilterChange('priceMin', e.target.value)}
-                        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className=""
                       />
                       <input
                         type="number"
@@ -406,7 +406,7 @@ export default function SpecialistsFilters() {
                         placeholder="До"
                         value={filters.priceMax}
                         onChange={(e) => handleFilterChange('priceMax', e.target.value)}
-                        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className=""
                       />
                     </div>
                   </FilterSection>
@@ -419,7 +419,7 @@ export default function SpecialistsFilters() {
                         id="mobileVerifiedOnly"
                         checked={filters.verifiedOnly}
                         onChange={(e) => handleFilterChange('verifiedOnly', e.target.checked)}
-                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+          className=""
                       />
                       <label htmlFor="mobileVerifiedOnly" className="ml-2 text-sm text-gray-700">
                         Только верифицированные специалисты
@@ -433,13 +433,13 @@ export default function SpecialistsFilters() {
                 <div className="flex space-x-3">
                   <button
                     onClick={handleReset}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    className="btn btn-secondary flex-1"
                   >
                     Сбросить
                   </button>
                   <button
                     onClick={() => setIsMobileFiltersOpen(false)}
-                    className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700"
+                    className="btn btn-primary flex-1"
                   >
                     Применить
                   </button>

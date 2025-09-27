@@ -60,6 +60,7 @@ export async function GET(
         name: sc.category.name
       })),
       verified: specialist.specialistProfile.verified,
+      avatarUrl: specialist.specialistProfile.avatarUrl,
       createdAt: specialist.specialistProfile.createdAt.toISOString()
     };
 

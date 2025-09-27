@@ -1,0 +1,65 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e6]:
+        - link "HealthApp" [ref=e8] [cursor=pointer]:
+          - /url: /
+        - navigation [ref=e9]
+    - main [ref=e13]:
+      - generic [ref=e18]:
+        - heading "Создать заявку" [level=1] [ref=e19]
+        - generic [ref=e20]:
+          - generic [ref=e21]:
+            - generic [ref=e22]: Категория специалиста *
+            - combobox "Категория специалиста *" [ref=e23]:
+              - option "Выберите категорию" [selected]
+              - option "Психолог"
+              - option "Нутрициолог"
+              - option "Персональный тренер"
+              - option "Коуч по здоровью"
+              - option "Физиотерапевт"
+          - generic [ref=e24]:
+            - generic [ref=e25]: Заголовок заявки *
+            - textbox "Заголовок заявки *" [ref=e26]
+          - generic [ref=e27]:
+            - generic [ref=e28]: Подробное описание *
+            - textbox "Подробное описание *" [ref=e29]
+          - generic [ref=e30]:
+            - generic [ref=e31]: Предпочтительный формат работы *
+            - generic [ref=e32]:
+              - generic [ref=e33]:
+                - radio "Онлайн консультации" [ref=e34]
+                - text: Онлайн консультации
+              - generic [ref=e35]:
+                - radio "Очные встречи" [ref=e36]
+                - text: Очные встречи
+              - generic [ref=e37]:
+                - radio "Любой формат" [checked] [ref=e38]
+                - text: Любой формат
+          - generic [ref=e39]:
+            - generic [ref=e40]: Бюджет (в рублях)
+            - generic [ref=e41]:
+              - generic [ref=e42]:
+                - generic [ref=e43]: От
+                - spinbutton "От" [ref=e44]
+              - generic [ref=e45]:
+                - generic [ref=e46]: До
+                - spinbutton "До" [ref=e47]
+          - generic [ref=e48]:
+            - button "Отмена" [ref=e49]
+            - button "Создать заявку" [ref=e50]
+      - generic [ref=e53]:
+        - generic [ref=e54]: © 2024 HealthApp. Все права защищены.
+        - generic [ref=e55]:
+          - link "Политика конфиденциальности" [ref=e56] [cursor=pointer]:
+            - /url: /privacy
+          - link "Условия использования" [ref=e57] [cursor=pointer]:
+            - /url: /terms
+          - link "Контакты" [ref=e58] [cursor=pointer]:
+            - /url: /contact
+    - region "Notifications alt+T"
+  - region "Notifications alt+T"
+```

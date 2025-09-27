@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { SpecialistCard as SpecialistCardType } from '@/types/specialist';
+import AvatarImage from './AvatarImage';
 
 interface SpecialistCardProps {
   specialist: SpecialistCardType;
@@ -29,18 +30,31 @@ export default function SpecialistCard({ specialist }: SpecialistCardProps) {
     <Link 
       href={`/specialists/${specialist.id}`}
       className="block bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 p-6 h-full"
+      data-testid="specialist-card"
+      data-id={specialist.id}
     >
       <div className="flex flex-col h-full">
-        {/* Header with name and verified badge */}
-        <div className="flex items-start justify-between mb-3">
-          <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
-            {specialist.displayName}
-          </h3>
-          {specialist.verified && (
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 ml-2 flex-shrink-0">
-              Verified
-            </span>
-          )}
+        {/* Avatar and Header */}
+        <div className="flex items-start space-x-3 mb-3">
+          <div className="flex-shrink-0">
+            <AvatarImage
+              src={specialist.avatarUrl}
+              alt={specialist.displayName}
+              className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between">
+              <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
+                {specialist.displayName}
+              </h3>
+              {specialist.verified && (
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 ml-2 flex-shrink-0">
+                  Verified
+                </span>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Categories */}

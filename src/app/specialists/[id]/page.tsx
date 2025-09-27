@@ -2,22 +2,64 @@ import { notFound } from 'next/navigation';
 import { SpecialistProfile } from '@/types/specialist';
 import Link from 'next/link';
 import { Metadata } from 'next';
+import StartChatButton from '@/components/StartChatButton';
+import Providers from '@/components/Providers';
+import AvatarImage from '@/components/AvatarImage';
+import { prisma } from '@/lib/prisma';
 
-// Функция для получения данных профиля специалиста
+// Функция для получения данных профиля специалиста через Prisma
 async function getSpecialistProfile(id: string): Promise<SpecialistProfile | null> {
   try {
-    const response = await fetch(`${process.env.NEXTAUTH_URL}/api/specialists/${id}`, {
-      cache: 'no-store'
-    });
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return null;
-      }
-      throw new Error('Failed to fetch specialist profile');
+    // Валидация ID
+    if (!id || typeof id !== 'string') {
+      return null;
     }
 
-    return response.json();
+    // Поиск специалиста с полными данными
+    const specialist = await prisma.user.findFirst({
+      where: {
+        id: id,
+        role: 'SPECIALIST',
+        status: 'ACTIVE',
+        specialistProfile: {
+          isNot: null
+        }
+      },
+      include: {
+        specialistProfile: true,
+        specialistCategories: {
+          include: {
+            category: true
+          }
+        }
+      }
+    });
+
+    // Если специалист не найден
+    if (!specialist || !specialist.specialistProfile) {
+      return null;
+    }
+
+    // Формирование профиля
+    const profile: SpecialistProfile = {
+      id: specialist.id,
+      displayName: specialist.specialistProfile.displayName,
+      bio: specialist.specialistProfile.bio,
+      city: specialist.specialistProfile.city,
+      onlineOnly: specialist.specialistProfile.onlineOnly,
+      experienceYears: specialist.specialistProfile.experienceYears,
+      priceMinCents: specialist.specialistProfile.priceMinCents,
+      priceMaxCents: specialist.specialistProfile.priceMaxCents,
+      categories: specialist.specialistCategories.map(sc => ({
+        slug: sc.category.slug,
+        name: sc.category.name
+      })),
+      verified: specialist.specialistProfile.verified,
+      avatarUrl: specialist.specialistProfile.avatarUrl,
+      createdAt: specialist.specialistProfile.createdAt.toISOString()
+    };
+
+    return profile;
   } catch (error) {
     console.error('Error fetching specialist profile:', error);
     return null;
@@ -85,7 +127,14 @@ async function SpecialistProfileComponent({ id }: { id: string }) {
     <div className="max-w-4xl mx-auto">
       {/* Header */}
       <div className="bg-white rounded-lg shadow-md p-6 sm:p-8 mb-6">
-        <div className="flex items-start justify-between mb-6">
+        <div className="flex items-start space-x-6 mb-6">
+          <div className="flex-shrink-0">
+            <AvatarImage
+              src={specialist.avatarUrl}
+              alt={specialist.displayName}
+              className="w-24 h-24 rounded-full object-cover border-4 border-gray-200"
+            />
+          </div>
           <div className="flex-1">
             <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 mb-4">
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
@@ -148,18 +197,9 @@ async function SpecialistProfileComponent({ id }: { id: string }) {
       {/* Actions */}
       <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-          <div className="flex-1 relative group">
-            <button 
-              disabled
-              className="w-full bg-gray-400 text-white px-4 sm:px-6 py-3 rounded-md text-base sm:text-lg font-medium cursor-not-allowed transition-colors"
-            >
-              Написать
-            </button>
-            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-              Чат в разработке
-              <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
-            </div>
-          </div>
+          <Providers>
+            <StartChatButton specialistId={specialist.id} />
+          </Providers>
           <button className="flex-1 bg-indigo-600 text-white px-4 sm:px-6 py-3 rounded-md text-base sm:text-lg font-medium hover:bg-indigo-700 transition-colors">
             Записаться на консультацию
           </button>

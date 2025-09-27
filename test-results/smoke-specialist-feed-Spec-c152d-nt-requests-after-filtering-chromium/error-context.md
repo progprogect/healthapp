@@ -1,0 +1,42 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e6]:
+        - link "HealthApp" [ref=e8] [cursor=pointer]:
+          - /url: /
+        - navigation [ref=e9]:
+          - link "Каталог" [ref=e10] [cursor=pointer]:
+            - /url: /specialists
+          - link "Войти" [ref=e11] [cursor=pointer]:
+            - /url: /auth/login
+          - link "Регистрация" [ref=e12] [cursor=pointer]:
+            - /url: /auth/register
+    - main [ref=e14]:
+      - generic [ref=e18]:
+        - generic [ref=e19]:
+          - img [ref=e21]
+          - heading "Профиль специалиста не найден" [level=1] [ref=e23]
+          - paragraph [ref=e24]: Для доступа к этой странице необходимо создать профиль специалиста.
+        - generic [ref=e25]:
+          - link "Стать специалистом" [ref=e26] [cursor=pointer]:
+            - /url: /app/specialist/profile/edit
+          - link "Вернуться в личный кабинет" [ref=e28] [cursor=pointer]:
+            - /url: /app
+      - generic [ref=e31]:
+        - generic [ref=e32]: © 2024 HealthApp. Все права защищены.
+        - generic [ref=e33]:
+          - link "Политика конфиденциальности" [ref=e34] [cursor=pointer]:
+            - /url: /privacy
+          - link "Условия использования" [ref=e35] [cursor=pointer]:
+            - /url: /terms
+          - link "Контакты" [ref=e36] [cursor=pointer]:
+            - /url: /contact
+    - region "Notifications alt+T"
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e42] [cursor=pointer]:
+    - img [ref=e43] [cursor=pointer]
+  - alert [ref=e46]
+```
