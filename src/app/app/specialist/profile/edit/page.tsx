@@ -6,6 +6,10 @@ import { useSession } from 'next-auth/react';
 import Providers from '@/components/Providers';
 import { toast } from 'sonner';
 import AvatarImage from '@/components/AvatarImage';
+import VideoUpload from '@/components/specialist/VideoUpload';
+import ImageGallery from '@/components/specialist/ImageGallery';
+import EducationForm from '@/components/specialist/EducationForm';
+import PublicationForm from '@/components/specialist/PublicationForm';
 
 interface SpecialistProfile {
   id: string;
@@ -23,6 +27,55 @@ interface SpecialistProfile {
     slug: string;
     name: string;
   }[];
+  
+  // Новые поля
+  videoPresentationUrl?: string;
+  videoThumbnailUrl?: string;
+  galleryImages: Array<{ url: string; alt?: string; order: number }>;
+  languages: string[];
+  ageGroups: string[];
+  timezone?: string;
+  averageRating: number;
+  totalReviews: number;
+  
+  // Связанные данные
+  education: Array<{
+    id: string;
+    title: string;
+    institution: string;
+    degree?: string;
+    year?: number;
+    documentUrl?: string;
+    documentType: string;
+    isVerified: boolean;
+    createdAt: string;
+  }>;
+  
+  publications: Array<{
+    id: string;
+    title: string;
+    url: string;
+    type: string;
+    year?: number;
+    isVerified: boolean;
+    createdAt: string;
+  }>;
+  
+  reviews: Array<{
+    id: string;
+    rating: number;
+    comment?: string;
+    isVerified: boolean;
+    isPublic: boolean;
+    createdAt: string;
+    client: {
+      id: string;
+      displayName: string;
+    };
+  }>;
+  
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface Category {
@@ -39,6 +92,13 @@ interface ProfileFormData {
   priceMin: string;
   priceMax: string;
   categorySlugs: string[];
+  
+  // Новые поля
+  videoPresentationUrl: string;
+  galleryImages: Array<{ url: string; alt?: string; order: number }>;
+  languages: string[];
+  ageGroups: string[];
+  timezone: string;
 }
 
 interface ProfileFormErrors {
@@ -69,6 +129,13 @@ function EditSpecialistProfilePageContent() {
     priceMin: '',
     priceMax: '',
     categorySlugs: [],
+    
+    // Новые поля
+    videoPresentationUrl: '',
+    galleryImages: [],
+    languages: [],
+    ageGroups: [],
+    timezone: '',
   });
   const [formErrors, setFormErrors] = useState<ProfileFormErrors>({});
   const [hasChanges, setHasChanges] = useState(false);
@@ -119,6 +186,13 @@ function EditSpecialistProfilePageContent() {
         priceMin: profileData.priceMinCents ? (profileData.priceMinCents / 100).toString() : '',
         priceMax: profileData.priceMaxCents ? (profileData.priceMaxCents / 100).toString() : '',
         categorySlugs: profileData.categories?.map(c => c.slug) || [],
+        
+        // Новые поля
+        videoPresentationUrl: profileData.videoPresentationUrl || '',
+        galleryImages: profileData.galleryImages || [],
+        languages: profileData.languages || [],
+        ageGroups: profileData.ageGroups || [],
+        timezone: profileData.timezone || '',
       };
 
       setFormData(initialData);
@@ -294,7 +368,14 @@ function EditSpecialistProfilePageContent() {
         onlineOnly: formData.onlineOnly,
         city: formData.onlineOnly ? null : formData.city.trim() || null,
         priceMinCents,
-        priceMaxCents
+        priceMaxCents,
+        
+        // Новые поля
+        videoPresentationUrl: formData.videoPresentationUrl || null,
+        galleryImages: formData.galleryImages,
+        languages: formData.languages,
+        ageGroups: formData.ageGroups,
+        timezone: formData.timezone || null
       };
 
       // Сохраняем профиль и категории параллельно
@@ -406,7 +487,7 @@ function EditSpecialistProfilePageContent() {
               <div className="flex items-center space-x-4">
                 <div className="relative">
                   <AvatarImage
-                    src={avatarPreview || profile?.avatarUrl}
+                    src={avatarPreview || profile?.avatarUrl || null}
                     alt="Аватар"
                     className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
                   />
@@ -635,6 +716,239 @@ function EditSpecialistProfilePageContent() {
               {formErrors.categories && (
                 <p className="mt-1 text-sm text-red-600">{formErrors.categories}</p>
               )}
+            </div>
+
+            {/* Видео-презентация */}
+            <div>
+              <VideoUpload
+                value={formData.videoPresentationUrl}
+                onChange={(url) => handleInputChange('videoPresentationUrl', url)}
+                specialistId={profile?.id || ''}
+                disabled={saving}
+              />
+            </div>
+
+            {/* Галерея работ */}
+            <div>
+              <ImageGallery
+                value={formData.galleryImages}
+                onChange={(images) => handleInputChange('galleryImages', images)}
+                specialistId={profile?.id || ''}
+                disabled={saving}
+                maxImages={10}
+              />
+            </div>
+
+            {/* Языки консультаций */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Языки консультаций
+              </label>
+              <div className="space-y-2">
+                {['Русский', 'Английский', 'Немецкий', 'Французский', 'Испанский'].map((language) => (
+                  <label key={language} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={formData.languages.includes(language)}
+                      onChange={(e) => {
+                        const newLanguages = e.target.checked
+                          ? [...formData.languages, language]
+                          : formData.languages.filter(lang => lang !== language);
+                        handleInputChange('languages', newLanguages);
+                      }}
+                      className="mr-2"
+                    />
+                    {language}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Возрастные группы */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Возрастные группы
+              </label>
+              <div className="space-y-2">
+                {[
+                  { value: 'children', label: 'Дети (до 12 лет)' },
+                  { value: 'teens', label: 'Подростки (13-17 лет)' },
+                  { value: 'adults', label: 'Взрослые (18-65 лет)' },
+                  { value: 'seniors', label: 'Пожилые (65+ лет)' }
+                ].map((group) => (
+                  <label key={group.value} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={formData.ageGroups.includes(group.value)}
+                      onChange={(e) => {
+                        const newGroups = e.target.checked
+                          ? [...formData.ageGroups, group.value]
+                          : formData.ageGroups.filter(g => g !== group.value);
+                        handleInputChange('ageGroups', newGroups);
+                      }}
+                      className="mr-2"
+                    />
+                    {group.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Часовой пояс */}
+            <div>
+              <label htmlFor="timezone" className="block text-sm font-medium text-gray-700 mb-2">
+                Часовой пояс
+              </label>
+              <select
+                id="timezone"
+                value={formData.timezone}
+                onChange={(e) => handleInputChange('timezone', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Выберите часовой пояс</option>
+                <option value="Europe/Moscow">Москва (UTC+3)</option>
+                <option value="Europe/Kiev">Киев (UTC+2)</option>
+                <option value="Europe/Minsk">Минск (UTC+3)</option>
+                <option value="Europe/London">Лондон (UTC+0)</option>
+                <option value="America/New_York">Нью-Йорк (UTC-5)</option>
+                <option value="Asia/Tokyo">Токио (UTC+9)</option>
+              </select>
+            </div>
+
+            {/* Образование */}
+            <div>
+              <h3 className="text-heading-4 mb-4">Образование и сертификаты</h3>
+              <div className="space-y-4">
+                {profile?.education.map((edu) => (
+                  <div key={edu.id} className="card p-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-medium">{edu.title}</h4>
+                        <p className="text-body-sm text-gray-600">{edu.institution}</p>
+                        {edu.degree && <p className="text-caption text-gray-500">{edu.degree}</p>}
+                        {edu.year && <p className="text-caption text-gray-500">{edu.year}</p>}
+                        {edu.documentUrl && (
+                          <a href={edu.documentUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-600 text-sm">
+                            Просмотреть документ
+                          </a>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        {edu.isVerified && (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            ✓ Верифицировано
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              const response = await fetch(`/api/me/specialist-profile/education/${edu.id}`, {
+                                method: 'DELETE'
+                              });
+                              if (response.ok) {
+                                // Обновляем профиль
+                                await fetchData();
+                                toast.success('Образование удалено');
+                              }
+                            } catch (error) {
+                              toast.error('Ошибка удаления образования');
+                            }
+                          }}
+                          className="text-red-600 hover:text-red-800 text-sm"
+                        >
+                          Удалить
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <EducationForm
+                  onAdd={async (education) => {
+                    try {
+                      const response = await fetch('/api/me/specialist-profile/education', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(education)
+                      });
+                      if (response.ok) {
+                        await fetchData();
+                        toast.success('Образование добавлено');
+                      }
+                    } catch (error) {
+                      toast.error('Ошибка добавления образования');
+                    }
+                  }}
+                  specialistId={profile?.id || ''}
+                  disabled={saving}
+                />
+              </div>
+            </div>
+
+            {/* Публикации */}
+            <div>
+              <h3 className="text-heading-4 mb-4">Публикации</h3>
+              <div className="space-y-4">
+                {profile?.publications.map((pub) => (
+                  <div key={pub.id} className="card p-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-medium">{pub.title}</h4>
+                        <a href={pub.url} target="_blank" rel="noopener noreferrer" className="text-indigo-600 text-sm">
+                          {pub.url}
+                        </a>
+                        <p className="text-caption text-gray-500">
+                          {pub.type} {pub.year && `• ${pub.year}`}
+                        </p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        {pub.isVerified && (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            ✓ Верифицировано
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              const response = await fetch(`/api/me/specialist-profile/publications/${pub.id}`, {
+                                method: 'DELETE'
+                              });
+                              if (response.ok) {
+                                await fetchData();
+                                toast.success('Публикация удалена');
+                              }
+                            } catch (error) {
+                              toast.error('Ошибка удаления публикации');
+                            }
+                          }}
+                          className="text-red-600 hover:text-red-800 text-sm"
+                        >
+                          Удалить
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <PublicationForm
+                  onAdd={async (publication) => {
+                    try {
+                      const response = await fetch('/api/me/specialist-profile/publications', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(publication)
+                      });
+                      if (response.ok) {
+                        await fetchData();
+                        toast.success('Публикация добавлена');
+                      }
+                    } catch (error) {
+                      toast.error('Ошибка добавления публикации');
+                    }
+                  }}
+                  disabled={saving}
+                />
+              </div>
             </div>
 
             {/* Статус верификации */}

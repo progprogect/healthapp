@@ -18,3 +18,4 @@ export default function AvatarImage({ src, alt, className }: AvatarImageProps) {
     />
   );
 }
+

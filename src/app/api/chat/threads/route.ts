@@ -13,8 +13,8 @@ const createThreadSchema = z.object({
 
 // Schema для параметров запроса списка тредов
 const getThreadsSchema = z.object({
-  limit: z.string().transform(Number).default('20'),
-  offset: z.string().transform(Number).default('0'),
+  limit: z.string().transform(Number).default(20),
+  offset: z.string().transform(Number).default(0),
 });
 
 // POST /api/chat/threads - создать/получить тред
@@ -63,7 +63,16 @@ export async function POST(request: Request) {
     });
 
     if (existingThread) {
-      return NextResponse.json({ threadId: existingThread.id } as CreateThreadResponse);
+      return NextResponse.json({ 
+        thread: {
+          id: existingThread.id,
+          clientId: existingThread.clientUserId,
+          specialistId: existingThread.specialistUserId,
+          requestId: existingThread.requestId,
+          createdAt: existingThread.createdAt.toISOString(),
+          updatedAt: existingThread.createdAt.toISOString()
+        }
+      } as CreateThreadResponse);
     }
 
     // Создаем новый тред
@@ -76,11 +85,20 @@ export async function POST(request: Request) {
       }
     });
 
-    return NextResponse.json({ threadId: newThread.id } as CreateThreadResponse, { status: 201 });
+    return NextResponse.json({ 
+      thread: {
+        id: newThread.id,
+        clientId: newThread.clientUserId,
+        specialistId: newThread.specialistUserId,
+        requestId: newThread.requestId,
+        createdAt: newThread.createdAt.toISOString(),
+        updatedAt: newThread.createdAt.toISOString()
+      }
+    } as CreateThreadResponse, { status: 201 });
 
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Неверные параметры запроса', details: error.errors }, { status: 400 });
+      return NextResponse.json({ error: 'Неверные параметры запроса', details: error.issues }, { status: 400 });
     }
     
     console.error('Error creating chat thread:', error);
@@ -144,19 +162,25 @@ export async function GET(request: Request) {
       
       return {
         id: thread.id,
+        clientId: thread.clientUserId,
+        specialistId: thread.specialistUserId,
+        requestId: thread.requestId,
+        createdAt: thread.createdAt.toISOString(),
+        updatedAt: thread.lastMessageAt.toISOString(),
         peer: {
           id: peer.id,
           displayName: peerProfile?.displayName || peer.email,
-          avatar: undefined // Пока нет аватаров
+          avatarUrl: undefined // Пока нет аватаров
         },
         lastMessage: thread.messages[0] ? {
           id: thread.messages[0].id,
-          body: thread.messages[0].body,
+          threadId: thread.id,
+          senderId: thread.messages[0].senderUserId,
+          content: thread.messages[0].body,
           createdAt: thread.messages[0].createdAt.toISOString(),
-          senderId: thread.messages[0].senderUserId
+          readAt: null
         } : undefined,
-        unreadCount: thread._count.messages,
-        updatedAt: thread.lastMessageAt.toISOString()
+        unreadCount: thread._count.messages
       };
     });
 
@@ -169,11 +193,11 @@ export async function GET(request: Request) {
       }
     });
 
-    return NextResponse.json({ items, total } as GetThreadsResponse);
+    return NextResponse.json({ threads: items, total } as GetThreadsResponse);
 
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Неверные параметры запроса', details: error.errors }, { status: 400 });
+      return NextResponse.json({ error: 'Неверные параметры запроса', details: error.issues }, { status: 400 });
     }
     
     console.error('Error fetching chat threads:', error);

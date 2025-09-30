@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import Input from "@/components/ui/Input"
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -84,68 +85,44 @@ export default function RegisterPage() {
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
-            <div>
-              <label htmlFor="displayName" className="block text-sm font-medium text-gray-700">
-                Имя (необязательно)
-              </label>
-              <input
-                id="displayName"
-                name="displayName"
-                type="text"
-                className="mt-1"
-                placeholder="Ваше имя"
-                value={formData.displayName}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="mt-1"
-                placeholder="Email адрес"
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Пароль
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                className="mt-1"
-                placeholder="Минимум 8 символов"
-                value={formData.password}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Подтвердите пароль
-              </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                required
-                className="mt-1"
-                placeholder="Повторите пароль"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-              />
-            </div>
+            <Input
+              label="Имя (необязательно)"
+              name="displayName"
+              type="text"
+              placeholder="Ваше имя"
+              value={formData.displayName}
+              onChange={handleChange}
+            />
+            <Input
+              label="Email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              placeholder="Email адрес"
+              value={formData.email}
+              onChange={handleChange}
+            />
+            <Input
+              label="Пароль"
+              name="password"
+              type="password"
+              autoComplete="new-password"
+              required
+              placeholder="Минимум 8 символов"
+              value={formData.password}
+              onChange={handleChange}
+            />
+            <Input
+              label="Подтвердите пароль"
+              name="confirmPassword"
+              type="password"
+              autoComplete="new-password"
+              required
+              placeholder="Повторите пароль"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+            />
           </div>
 
           {error && (

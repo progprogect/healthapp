@@ -47,10 +47,16 @@ export async function PUT(request: Request) {
 
       // Создаем новые связи
       if (validatedData.slugs.length > 0) {
+        // First get category IDs from slugs
+        const categories = await tx.category.findMany({
+          where: { slug: { in: validatedData.slugs } },
+          select: { id: true, slug: true }
+        });
+
         await tx.specialistCategory.createMany({
-          data: validatedData.slugs.map(slug => ({
+          data: categories.map(cat => ({
             specialistUserId: user.id,
-            categorySlug: slug
+            categoryId: cat.id
           }))
         });
       }
@@ -62,7 +68,7 @@ export async function PUT(request: Request) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ 
         error: 'Validation error', 
-        details: error.errors.map(err => ({
+        details: error.issues.map(err => ({
           field: err.path.join('.'),
           message: err.message
         }))
@@ -78,3 +84,4 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
+

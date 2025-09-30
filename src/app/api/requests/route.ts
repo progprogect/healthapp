@@ -9,9 +9,7 @@ const createRequestSchema = z.object({
   categorySlug: z.string().min(1, 'Категория обязательна'),
   title: z.string().min(5, 'Заголовок должен содержать минимум 5 символов').max(200, 'Заголовок не должен превышать 200 символов'),
   description: z.string().min(20, 'Описание должно содержать минимум 20 символов').max(2000, 'Описание не должно превышать 2000 символов'),
-  preferredFormat: z.enum(['online', 'offline', 'any'], {
-    errorMap: () => ({ message: 'Формат должен быть online, offline или any' })
-  }),
+  preferredFormat: z.enum(['online', 'offline', 'any']),
   city: z.string().optional(),
   budgetMinCents: z.number().min(0, 'Минимальный бюджет не может быть отрицательным').optional(),
   budgetMaxCents: z.number().min(0, 'Максимальный бюджет не может быть отрицательным').optional(),
@@ -85,7 +83,7 @@ export async function POST(request: Request) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ 
         error: 'Ошибка валидации', 
-        details: error.errors.map(err => ({
+        details: error.issues.map(err => ({
           field: err.path.join('.'),
           message: err.message
         }))

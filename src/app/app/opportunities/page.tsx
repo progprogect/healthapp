@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { RequestFeedItem, OpportunityFilters, ApplicationFormData, ApplicationFormErrors } from '@/types/request';
 import SpecialistGate from '@/components/SpecialistGate';
+import RequestStatusBadge from '@/components/RequestStatusBadge';
+import RequestStatusActions from '@/components/RequestStatusActions';
 
 export default function OpportunitiesPage() {
   return (
@@ -166,17 +168,17 @@ function OpportunitiesContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Заголовок */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Лента заявок</h1>
-          <p className="text-gray-600 mt-1">Найдите подходящие заявки и откликнитесь на них</p>
+        <div className="mb-8">
+          <h1 className="text-heading-1">Лента заявок</h1>
+          <p className="text-body mt-2">Найдите подходящие заявки и откликнитесь на них</p>
         </div>
 
         {/* Фильтры */}
-        <div className="bg-white shadow rounded-lg p-6 mb-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Фильтры</h2>
+        <div className="card-elevated p-6 mb-8">
+          <h2 className="text-heading-3 mb-6">Фильтры</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Категория */}
             <div>
@@ -275,24 +277,53 @@ function OpportunitiesContent() {
             </button>
           </div>
         ) : opportunities.length === 0 ? (
-          <div className="bg-white shadow rounded-lg p-8 text-center">
-            <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+          <div className="card-elevated p-8 text-center">
+            <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
               <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Нет подходящих заявок</h3>
-            <p className="text-gray-500">Попробуйте изменить фильтры или зайдите позже</p>
+            <h3 className="text-heading-3 mb-3">Нет подходящих заявок</h3>
+            <p className="text-body">Попробуйте изменить фильтры или зайдите позже</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div>
+            <div className="mb-6">
+              <h2 className="text-heading-2 mb-2">🎯 Заявки для вас ({opportunities.length})</h2>
+              <p className="text-body-sm text-gray-600">
+                Показываем заявки в ваших категориях, отсортированные по релевантности
+              </p>
+            </div>
+            <div className="space-y-6">
             {opportunities.map((opportunity) => (
-              <div key={opportunity.id} data-testid="request-card" className="bg-white shadow rounded-lg p-6">
+              <div key={opportunity.id} data-testid="request-card" className="card-elevated p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">{opportunity.title}</h3>
-                    <p className="text-gray-600 text-sm mb-3">{opportunity.description}</p>
-                    <div className="flex items-center space-x-4 text-sm text-gray-500">
+                    <div className="flex items-center gap-3 mb-3">
+                      <h3 className="text-heading-3">{opportunity.title}</h3>
+                      <RequestStatusBadge status={opportunity.status} />
+                      {opportunity.relevanceScore && opportunity.relevanceScore > 0 && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          ⭐ {opportunity.relevanceScore} релевантность
+                        </span>
+                      )}
+                    </div>
+                    {opportunity.relevanceReasons && opportunity.relevanceReasons.length > 0 && (
+                      <div className="mb-3">
+                        <div className="flex flex-wrap gap-1">
+                          {opportunity.relevanceReasons.map((reason, index) => (
+                            <span
+                              key={index}
+                              className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                            >
+                              {reason}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    <p className="text-body-sm mb-4">{opportunity.description}</p>
+                    <div className="flex items-center space-x-4 text-caption">
                       <span className="inline-flex items-center">
                         <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
@@ -317,30 +348,62 @@ function OpportunitiesContent() {
                       )}
                     </div>
                   </div>
-                  <div className="flex flex-col items-end space-y-2">
-                    <span className="text-xs text-gray-500">
+                  <div className="flex flex-col items-end space-y-3">
+                    <span className="text-caption">
                       {formatDate(opportunity.createdAt)}
                     </span>
                   </div>
                 </div>
                 
                 <div className="flex justify-between items-center">
-                  <div className="text-sm text-gray-500">
+                  <div className="text-body-sm">
                     Опубликована {formatDate(opportunity.createdAt)}
                   </div>
-                  <button
-                    data-testid="apply-button"
-                    onClick={() => {
-                      setSelectedRequest(opportunity);
-                      setShowApplicationModal(true);
-                    }}
-                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    Откликнуться
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <RequestStatusActions
+                      requestId={opportunity.id}
+                      currentStatus={opportunity.status}
+                      isClient={false} // В ленте специалистов
+                      isSpecialist={true}
+                      onStatusChange={(newStatus) => {
+                        // Обновляем статус в локальном состоянии
+                        setOpportunities(prev => 
+                          prev.map(req => 
+                            req.id === opportunity.id 
+                              ? { ...req, status: newStatus }
+                              : req
+                          )
+                        );
+                      }}
+                    />
+                    {opportunity.status === 'OPEN' && (
+                      <button
+                        data-testid="apply-button"
+                        onClick={() => {
+                          setSelectedRequest(opportunity);
+                          setShowApplicationModal(true);
+                        }}
+                        className="btn btn-primary btn-md"
+                      >
+                        Откликнуться
+                      </button>
+                    )}
+                    {opportunity.status === 'IN_PROGRESS' && (
+                      <button
+                        onClick={() => {
+                          // Переход в чат
+                          window.location.href = `/app/chat/${opportunity.id}`;
+                        }}
+                        className="btn btn-secondary btn-md"
+                      >
+                        Написать в чат
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
+            </div>
           </div>
         )}
 

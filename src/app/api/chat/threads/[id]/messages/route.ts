@@ -7,7 +7,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
 // Schema для параметров запроса сообщений
 const getMessagesSchema = z.object({
-  limit: z.string().transform(Number).default('50'),
+  limit: z.string().transform(Number).default(50),
   beforeId: z.string().optional(),
 });
 
@@ -87,13 +87,19 @@ export async function GET(
     })).reverse(); // Переворачиваем, чтобы старые сообщения были первыми
 
     return NextResponse.json({
-      items: responseItems,
-      hasMore
+      messages: responseItems.map(item => ({
+        id: item.id,
+        threadId: threadId,
+        senderId: item.senderId,
+        content: item.body,
+        createdAt: item.createdAt,
+        readAt: item.isRead ? item.createdAt : null
+      }))
     } as GetMessagesResponse);
 
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Неверные параметры запроса', details: error.errors }, { status: 400 });
+      return NextResponse.json({ error: 'Неверные параметры запроса', details: error.issues }, { status: 400 });
     }
     
     console.error('Error fetching chat messages:', error);
@@ -160,8 +166,8 @@ export async function POST(
     }
 
     // Эмитим обновление треда
-    if (global.emitThreadUpdated) {
-      global.emitThreadUpdated(threadId, {
+    if ((global as any).emitThreadUpdated) {
+      (global as any).emitThreadUpdated(threadId, {
         id: message.id,
         body: message.body,
         createdAt: message.createdAt.toISOString(),
@@ -170,13 +176,19 @@ export async function POST(
     }
 
     return NextResponse.json({
-      id: message.id,
-      createdAt: message.createdAt.toISOString()
+      message: {
+        id: message.id,
+        threadId: message.threadId,
+        senderId: message.senderUserId,
+        content: message.body,
+        createdAt: message.createdAt.toISOString(),
+        readAt: null
+      }
     } as SendMessageResponse, { status: 201 });
 
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Неверные параметры запроса', details: error.errors }, { status: 400 });
+      return NextResponse.json({ error: 'Неверные параметры запроса', details: error.issues }, { status: 400 });
     }
     
     console.error('Error sending chat message:', error);

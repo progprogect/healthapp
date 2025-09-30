@@ -37,49 +37,24 @@ app.prepare().then(() => {
     path: '/api/socket',
   });
 
-  // Middleware для авторизации Socket.IO
+  // Middleware для авторизации Socket.IO через JWT
   io.use(async (socket, next) => {
     try {
-      const cookie = socket.handshake.headers.cookie;
+      const userId = socket.handshake.auth.token;
       
-      if (!cookie) {
-        console.log('Socket connection rejected: no cookie');
+      if (!userId) {
+        console.log('Socket connection rejected: no user ID');
         return next(new Error('Authentication required'));
-      }
-
-      // Проверяем наличие NextAuth сессии
-      if (!cookie.includes('next-auth.session-token')) {
-        console.log('Socket connection rejected: no session token');
-        return next(new Error('Invalid session'));
-      }
-
-      // Делаем запрос к API для получения сессии
-      const sessionResponse = await fetch('http://localhost:3001/api/auth/session', {
-        headers: {
-          cookie: cookie,
-        },
-      });
-
-      if (!sessionResponse.ok) {
-        console.log('Socket connection rejected: invalid session response');
-        return next(new Error('Invalid session'));
-      }
-
-      const sessionData = await sessionResponse.json();
-      
-      if (!sessionData.user) {
-        console.log('Socket connection rejected: no user in session');
-        return next(new Error('No user in session'));
       }
 
       // Добавляем пользователя в объект сокета
       socket.user = {
-        id: sessionData.user.id,
-        email: sessionData.user.email || '',
-        role: sessionData.user.role || 'CLIENT',
+        id: userId,
+        email: '',
+        role: 'CLIENT',
       };
 
-      console.log(`Socket connected: ${socket.user.email} (${socket.user.role})`);
+      console.log(`Socket connected: user ${socket.user.id}`);
       next();
     } catch (error) {
       console.error('Socket auth error:', error);

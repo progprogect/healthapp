@@ -2,6 +2,10 @@ interface AppErrorProps {
   title?: string;
   message?: string;
   onRetry?: () => void;
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
   className?: string;
 }
 
@@ -9,6 +13,7 @@ export default function AppError({
   title = 'Произошла ошибка',
   message = 'Что-то пошло не так. Попробуйте обновить страницу.',
   onRetry,
+  action,
   className = ''
 }: AppErrorProps) {
   return (
@@ -30,6 +35,16 @@ export default function AppError({
           Попробовать снова
         </button>
       )}
+      
+      {action && (
+        <button
+          onClick={action.onClick}
+          className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition-colors"
+        >
+          {action.label}
+        </button>
+      )}
     </div>
   );
 }
+

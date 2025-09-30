@@ -11,8 +11,9 @@ export async function PUT(
     const resolvedParams = await params;
     const filePath = resolvedParams.path.join('/');
     
-    // Проверяем, что путь начинается с avatars/
-    if (!filePath.startsWith('avatars/')) {
+    // Проверяем, что путь начинается с разрешенной категории
+    const allowedPrefixes = ['avatars/', 'video/', 'gallery/', 'documents/'];
+    if (!allowedPrefixes.some(prefix => filePath.startsWith(prefix))) {
       return NextResponse.json({ error: 'Invalid file path' }, { status: 400 });
     }
 

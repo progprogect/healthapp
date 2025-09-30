@@ -1,22 +1,10 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  /* Шрифты берём из next/font (Inter). Эти токены не используем. */
-  --font-sans: initial;
-  --font-mono: initial;
-  /* Семантические цвета */
-  --color-brand-600: #4f46e5; /* indigo-600 */
-  --color-brand-700: #4338ca; /* indigo-700 */
-  --color-surface: #ffffff;   /* фон карточек */
-  --color-muted: #f9fafb;     /* мягкий фон секций */
-  --color-border: #e5e7eb;    /* gray-200 для границ */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -64,21 +52,142 @@ a.btn-primary:hover, button.btn-primary:hover, .btn-primary:hover {
 }
 
 /* === Form Elements === */
-/* Автоматическое применение стилей к формам */
-input[type="text"], input[type="number"], input[type="email"], input[type="password"] {
-  @apply w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors;
+/* Стили для форм - максимальная специфичность без @layer */
+.specialists-filters input[type="text"], 
+.specialists-filters input[type="number"], 
+.specialists-filters input[type="email"], 
+.specialists-filters input[type="password"] {
+  display: block !important;
+  width: 100% !important;
+  background-color: white !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 0.375rem !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  font-size: 0.875rem !important;
+  line-height: 1.25rem !important;
+  padding: 0.5rem 0.75rem !important;
+  transition: all 0.15s ease-in-out !important;
 }
 
-select {
-  @apply w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-white;
+.specialists-filters input[type="text"]:focus, 
+.specialists-filters input[type="number"]:focus, 
+.specialists-filters input[type="email"]:focus, 
+.specialists-filters input[type="password"]:focus {
+  outline: none !important;
+  border-color: #4f46e5 !important;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
 }
 
-input[type="checkbox"] {
-  @apply h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded;
+/* === УНИФИЦИРОВАННЫЕ СТИЛИ ДЛЯ RADIO И CHECKBOX === */
+/* Универсальные стили для всех радиобаттонов */
+.form-radio {
+  width: 1rem !important;
+  height: 1rem !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 50% !important;
+  background-color: white !important;
+  transition: all 0.15s ease-in-out !important;
+  appearance: none !important;
+  cursor: pointer !important;
 }
 
-input[type="radio"] {
-  @apply h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300;
+.form-radio:checked {
+  background-color: #4f46e5 !important;
+  border-color: #4f46e5 !important;
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='8' cy='8' r='3'/%3e%3c/svg%3e") !important;
+  background-size: 0.5rem 0.5rem !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.form-radio:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+}
+
+.form-radio:hover {
+  border-color: #4f46e5 !important;
+}
+
+/* Универсальные стили для всех чекбоксов */
+.form-checkbox {
+  width: 1rem !important;
+  height: 1rem !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 0.25rem !important;
+  background-color: white !important;
+  transition: all 0.15s ease-in-out !important;
+  appearance: none !important;
+  cursor: pointer !important;
+}
+
+.form-checkbox:checked {
+  background-color: #4f46e5 !important;
+  border-color: #4f46e5 !important;
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='m13.854 3.646-8 8a.5.5 0 0 1-.708 0l-4-4a.5.5 0 1 1 .708-.708L5.5 10.293l7.646-7.647a.5.5 0 0 1 .708.708z'/%3e%3c/svg%3e") !important;
+  background-size: 0.75rem 0.75rem !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.form-checkbox:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+}
+
+.form-checkbox:hover {
+  border-color: #4f46e5 !important;
+}
+
+/* Обратная совместимость для specialists-filters */
+.specialists-filters input[type="radio"] {
+  width: 1rem !important;
+  height: 1rem !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 50% !important;
+  background-color: white !important;
+  transition: all 0.15s ease-in-out !important;
+  appearance: none !important;
+  cursor: pointer !important;
+}
+
+.specialists-filters input[type="radio"]:checked {
+  background-color: #4f46e5 !important;
+  border-color: #4f46e5 !important;
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='8' cy='8' r='3'/%3e%3c/svg%3e") !important;
+  background-size: 0.5rem 0.5rem !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.specialists-filters input[type="radio"]:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+}
+
+.specialists-filters input[type="checkbox"] {
+  width: 1rem !important;
+  height: 1rem !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 0.25rem !important;
+  background-color: white !important;
+  transition: all 0.15s ease-in-out !important;
+  appearance: none !important;
+  cursor: pointer !important;
+}
+
+.specialists-filters input[type="checkbox"]:checked {
+  background-color: #4f46e5 !important;
+  border-color: #4f46e5 !important;
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='m13.854 3.646-8 8a.5.5 0 0 1-.708 0l-4-4a.5.5 0 1 1 .708-.708L5.5 10.293l7.646-7.647a.5.5 0 0 1 .708.708z'/%3e%3c/svg%3e") !important;
+  background-size: 0.75rem 0.75rem !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.specialists-filters input[type="checkbox"]:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
 }
 
 /* Стили для label */
@@ -91,14 +200,130 @@ input::placeholder, select::placeholder {
   @apply text-gray-400;
 }
 
-/* === Surfaces === */
-.card { @apply bg-[--color-surface] rounded-lg shadow border border-[--color-border]; }
-.card-muted { @apply bg-[--color-muted] rounded-lg border border-[--color-border]; }
+/* === УНИВЕРСАЛЬНЫЕ ФОРМЫ === */
+/* Базовые стили для всех input элементов */
+.form-input {
+  display: block !important;
+  width: 100% !important;
+  background-color: white !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 0.375rem !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  font-size: 0.875rem !important;
+  line-height: 1.25rem !important;
+  padding: 0.5rem 0.75rem !important;
+  transition: all 0.15s ease-in-out !important;
+}
 
-/* === Layout helpers === */
+.form-input:focus {
+  outline: none !important;
+  border-color: #4f46e5 !important;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+}
+
+.form-input::placeholder {
+  color: #9ca3af !important;
+}
+
+.form-input-error {
+  border-color: #ef4444 !important;
+}
+
+.form-input-error:focus {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Стили для textarea */
+.form-textarea {
+  display: block !important;
+  width: 100% !important;
+  background-color: white !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 0.375rem !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  font-size: 0.875rem !important;
+  line-height: 1.25rem !important;
+  padding: 0.5rem 0.75rem !important;
+  transition: all 0.15s ease-in-out !important;
+  resize: vertical !important;
+  min-height: 2.5rem !important;
+}
+
+.form-textarea:focus {
+  outline: none !important;
+  border-color: #4f46e5 !important;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+}
+
+.form-textarea::placeholder {
+  color: #9ca3af !important;
+}
+
+/* Специальный класс для селектов в фильтрах */
+.specialists-select {
+  display: block !important;
+  width: 100% !important;
+  background-color: white !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 0.375rem !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  font-size: 0.875rem !important;
+  line-height: 1.25rem !important;
+  padding: 0.5rem 0.75rem !important;
+  transition: all 0.15s ease-in-out !important;
+  appearance: none !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+  background-position: right 0.5rem center !important;
+  background-repeat: no-repeat !important;
+  background-size: 1.5em 1.5em !important;
+  padding-right: 2.5rem !important;
+}
+
+.specialists-select:focus {
+  outline: none !important;
+  border-color: #4f46e5 !important;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+}
+
+/* === КОМПОНЕНТНАЯ СИСТЕМА === */
+/* Карточки */
+.card { @apply bg-white rounded-lg shadow-sm border border-gray-200; }
+.card-interactive { @apply bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200; }
+.card-muted { @apply bg-gray-50 rounded-lg border border-gray-200; }
+.card-elevated { @apply bg-white rounded-lg shadow-md border border-gray-200; }
+
+/* Кнопки - расширенная система */
+.btn-sm { @apply px-3 py-1.5 text-sm font-medium; }
+.btn-md { @apply px-4 py-2 text-sm font-medium; }
+.btn-lg { @apply px-6 py-3 text-base font-medium; }
+.btn-xl { @apply px-8 py-4 text-lg font-medium; }
+
+/* Специальные кнопки */
+.btn-outline { @apply bg-white border border-[--color-brand-600] text-[--color-brand-600] hover:bg-[--color-brand-50]; }
+.btn-ghost { @apply text-[--color-brand-700] hover:text-[--color-brand-600] hover:bg-[--color-brand-50]; }
+
+/* === LAYOUT HELPERS === */
 .section { @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12; }
 .section-bordered { @apply bg-white border-y border-gray-100; }
 .section-alt { @apply bg-gray-50; }
+
+/* Spacing utilities */
+.space-xs { @apply space-y-2; }
+.space-sm { @apply space-y-4; }
+.space-md { @apply space-y-6; }
+.space-lg { @apply space-y-8; }
+.space-xl { @apply space-y-12; }
+
+/* === TYPOGRAPHY SYSTEM === */
+.text-display { @apply text-4xl sm:text-5xl font-bold text-gray-900 tracking-tight; }
+.text-heading-1 { @apply text-3xl font-bold text-gray-900; }
+.text-heading-2 { @apply text-2xl font-bold text-gray-900; }
+.text-heading-3 { @apply text-xl font-semibold text-gray-900; }
+.text-heading-4 { @apply text-lg font-semibold text-gray-900; }
+.text-body { @apply text-base text-gray-700; }
+.text-body-sm { @apply text-sm text-gray-600; }
+.text-caption { @apply text-xs text-gray-500; }
 
 /* === A11y focus === */
 a:focus-visible, button:focus-visible { @apply outline-none ring-2 ring-[--color-brand-600] ring-offset-2; }

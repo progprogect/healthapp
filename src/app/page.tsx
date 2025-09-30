@@ -46,31 +46,31 @@ export default function HomePage() {
         <section className="section sm:py-16">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <div>
-              <h1 className="text-4xl sm:text-5xl font-bold text-indigo-900 tracking-tight">
+              <h1 className="text-display text-indigo-900">
                 Найдите своего специалиста по здоровью
               </h1>
-              <p className="mt-4 text-lg text-indigo-700">
+              <p className="mt-6 text-lg text-indigo-700">
                 Психологи, нутрициологи, тренеры и другие эксперты. Каталог, заявки и встроенный чат — всё в одном месте.
               </p>
-              <div className="mt-8 flex flex-col sm:flex-row gap-3">
+              <div className="mt-8 flex flex-col sm:flex-row gap-4">
                 <Link
                   data-testid="cta-catalog"
                   href="/specialists"
-                  className="btn btn-secondary text-base"
+                  className="btn btn-secondary btn-lg"
                 >
                   Посмотреть каталог
                 </Link>
                 <Link
                   data-testid="cta-signup"
                   href="/auth/register"
-                  className="btn btn-primary text-base"
+                  className="btn btn-primary btn-lg"
                 >
                   Зарегистрироваться
                 </Link>
               </div>
-              <div className="mt-6 bg-blue-50 border border-blue-100 rounded-lg p-4 max-w-lg">
-                <h3 className="text-sm font-semibold text-blue-900 mb-1">Почему HealthApp</h3>
-                <p className="text-sm text-blue-800">
+              <div className="mt-8 bg-indigo-50 border border-indigo-200 rounded-lg p-6 max-w-lg">
+                <h3 className="text-heading-4 text-indigo-900 mb-2">Почему HealthApp</h3>
+                <p className="text-body-sm text-indigo-800">
                   Проверенные специалисты, удобный поиск и честная коммуникация — без лишних приложений.
                 </p>
               </div>
@@ -109,22 +109,22 @@ export default function HomePage() {
         {/* Как это работает */}
         <section className="section-bordered">
           <div className="section">
-            <h2 className="text-2xl font-bold text-indigo-900">Как это работает</h2>
+            <h2 className="text-heading-1 text-indigo-900">Как это работает</h2>
             <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="card-muted p-6">
-                <div className="w-10 h-10 rounded-md bg-indigo-100 text-indigo-700 flex items-center justify-center font-semibold">1</div>
-                <h3 className="mt-4 font-semibold text-indigo-900">Выберите или опишите задачу</h3>
-                <p className="mt-2 text-sm text-indigo-700">Найдите специалиста в каталоге или создайте заявку, чтобы получить отклики.</p>
+                <div className="w-12 h-12 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-semibold text-lg">1</div>
+                <h3 className="mt-6 text-heading-3 text-indigo-900">Выберите или опишите задачу</h3>
+                <p className="mt-3 text-body-sm text-indigo-700">Найдите специалиста в каталоге или создайте заявку, чтобы получить отклики.</p>
               </div>
               <div className="card-muted p-6">
-                <div className="w-10 h-10 rounded-md bg-indigo-100 text-indigo-700 flex items-center justify-center font-semibold">2</div>
-                <h3 className="mt-4 font-semibold text-indigo-900">Сравните отклики</h3>
-                <p className="mt-2 text-sm text-indigo-700">Изучайте профили, опыт и цены. Выберите подходящего.</p>
+                <div className="w-12 h-12 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-semibold text-lg">2</div>
+                <h3 className="mt-6 text-heading-3 text-indigo-900">Сравните отклики</h3>
+                <p className="mt-3 text-body-sm text-indigo-700">Изучайте профили, опыт и цены. Выберите подходящего.</p>
               </div>
               <div className="card-muted p-6">
-                <div className="w-10 h-10 rounded-md bg-indigo-100 text-indigo-700 flex items-center justify-center font-semibold">3</div>
-                <h3 className="mt-4 font-semibold text-indigo-900">Общайтесь в чате</h3>
-                <p className="mt-2 text-sm text-indigo-700">Договоритесь о встрече и деталях прямо в приложении.</p>
+                <div className="w-12 h-12 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-semibold text-lg">3</div>
+                <h3 className="mt-6 text-heading-3 text-indigo-900">Общайтесь в чате</h3>
+                <p className="mt-3 text-body-sm text-indigo-700">Договоритесь о встрече и деталях прямо в приложении.</p>
               </div>
             </div>
           </div>
@@ -163,7 +163,7 @@ export default function HomePage() {
         {/* Преимущества */}
         <section className="section-bordered">
           <div className="section">
-            <h2 className="text-2xl font-bold text-gray-900">Почему нас выбирают</h2>
+            <h2 className="text-heading-1 text-gray-900">Почему нас выбирают</h2>
             <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
                 { title: "Проверенные специалисты", text: "Верификация и профили с ключевой информацией." },
@@ -171,9 +171,9 @@ export default function HomePage() {
                 { title: "Честная коммуникация", text: "Чат в приложении, никаких лишних мессенджеров." },
                 { title: "Готово к масштабированию", text: "Проектная архитектура и индексы под нагрузку." },
               ].map((b, i) => (
-                <div key={i} className="bg-gray-50 rounded-lg p-6">
-                  <h3 className="font-semibold text-gray-900">{b.title}</h3>
-                  <p className="mt-2 text-sm text-gray-600">{b.text}</p>
+                <div key={i} className="card-muted p-6">
+                  <h3 className="text-heading-3 text-gray-900">{b.title}</h3>
+                  <p className="mt-3 text-body-sm text-gray-600">{b.text}</p>
                 </div>
               ))}
             </div>
@@ -182,21 +182,21 @@ export default function HomePage() {
 
         {/* Финальный CTA */}
         <section className="section">
-          <div className="bg-indigo-600 rounded-xl p-6 sm:p-8 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="bg-indigo-600 rounded-xl p-8 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div>
-              <h2 className="text-2xl font-bold">Готовы начать?</h2>
-              <p className="mt-1 text-indigo-100">Найдите специалиста в каталоге или опишите задачу — это бесплатно.</p>
+              <h2 className="text-heading-2 text-white">Готовы начать?</h2>
+              <p className="mt-2 text-indigo-100">Найдите специалиста в каталоге или опишите задачу — это бесплатно.</p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-4">
               <Link
                 href="/specialists"
-                className="btn btn-secondary"
+                className="btn btn-secondary btn-lg"
               >
                 Каталог специалистов
               </Link>
               <Link
                 href="/auth/register"
-                className="btn btn-primary"
+                className="btn btn-primary btn-lg"
               >
                 Зарегистрироваться
               </Link>

@@ -1,25 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 interface ClientNavProps {
   unreadCount?: number;
 }
 
-export default function ClientNav({ unreadCount = 0 }: ClientNavProps) {
+function ClientNav({ unreadCount = 0 }: ClientNavProps) {
   const { data: session } = useSession();
   const pathname = usePathname();
+  const router = useRouter();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
   const isActive = (path: string) => pathname.startsWith(path);
+
+  const handlePrefetch = (href: string) => {
+    router.prefetch(href);
+  };
 
   return (
     <>
       <Link 
         href="/specialists" 
+        onMouseEnter={() => handlePrefetch('/specialists')}
         className={`transition-colors ${
           isActive('/specialists') 
             ? 'text-indigo-600 font-medium' 
@@ -32,6 +38,7 @@ export default function ClientNav({ unreadCount = 0 }: ClientNavProps) {
       
       <Link 
         href="/app/requests" 
+        onMouseEnter={() => handlePrefetch('/app/requests')}
         className={`transition-colors ${
           isActive('/app/requests') 
             ? 'text-indigo-600 font-medium' 
@@ -44,6 +51,7 @@ export default function ClientNav({ unreadCount = 0 }: ClientNavProps) {
       
       <Link 
         href="/app/chat" 
+        onMouseEnter={() => handlePrefetch('/app/chat')}
         className={`transition-colors relative ${
           isActive('/app/chat') 
             ? 'text-indigo-600 font-medium' 
@@ -105,3 +113,5 @@ export default function ClientNav({ unreadCount = 0 }: ClientNavProps) {
     </>
   );
 }
+
+export default memo(ClientNav);

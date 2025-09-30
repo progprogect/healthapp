@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useDebounce } from '@/hooks/useDebounce'
+import { Select, Radio, Checkbox } from './ui'
 
 interface FilterState {
   category: string
@@ -140,7 +141,7 @@ export default function SpecialistsFilters() {
 
   const FilterSection = ({ children, title }: { children: React.ReactNode, title: string }) => (
     <div className="space-y-4">
-      <h3 className="text-sm font-medium text-gray-900">{title}</h3>
+      <h3 className="text-heading-4">{title}</h3>
       {children}
     </div>
   )
@@ -161,12 +162,12 @@ export default function SpecialistsFilters() {
       </div>
 
       {/* Desktop Filters */}
-      <div className="hidden lg:block bg-white rounded-lg shadow p-6 mb-8">
+      <div className="hidden lg:block card-elevated p-6 mb-8 specialists-filters">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-medium text-gray-900">Фильтры</h2>
+          <h2 className="text-heading-3">Фильтры</h2>
           <button
             onClick={handleReset}
-            className="text-sm text-indigo-600 hover:text-indigo-500"
+            className="btn-outline btn-sm"
           >
             Сбросить
           </button>
@@ -180,23 +181,18 @@ export default function SpecialistsFilters() {
               placeholder="Поиск по имени или специализации..."
               value={filters.q}
               onChange={(e) => handleFilterChange('q', e.target.value)}
-className=""
+              className="block w-full bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm px-3 py-2"
             />
           </FilterSection>
 
           {/* Category */}
           <FilterSection title="Категория">
-            <select
+            <Select
               value={filters.category}
               onChange={(e) => handleFilterChange('category', e.target.value)}
-className=""
-            >
-              {CATEGORIES.map((cat) => (
-                <option key={cat.value} value={cat.value}>
-                  {cat.label}
-                </option>
-              ))}
-            </select>
+              options={CATEGORIES}
+              placeholder="Все категории"
+            />
           </FilterSection>
 
           {/* Format */}
@@ -207,17 +203,14 @@ className=""
                 { value: 'online', label: 'Только онлайн' },
                 { value: 'offline', label: 'Только офлайн' },
               ].map((option) => (
-                <label key={option.value} className="flex items-center">
-                  <input
-                    type="radio"
-                    name="format"
-                    value={option.value}
-                    checked={filters.format === option.value}
-                    onChange={(e) => handleFilterChange('format', e.target.value)}
-className=""
-                  />
-                  <span className="ml-2 text-sm text-gray-700">{option.label}</span>
-                </label>
+                <Radio
+                  key={option.value}
+                  name="format"
+                  value={option.value}
+                  checked={filters.format === option.value}
+                  onChange={(e) => handleFilterChange('format', e.target.value)}
+                  label={option.label}
+                />
               ))}
             </div>
           </FilterSection>
@@ -225,17 +218,12 @@ className=""
           {/* City (only for offline) */}
           {filters.format === 'offline' && (
             <FilterSection title="Город">
-              <select
+              <Select
                 value={filters.city}
                 onChange={(e) => handleFilterChange('city', e.target.value)}
-  className=""
-              >
-                {CITIES.map((city) => (
-                  <option key={city.value} value={city.value}>
-                    {city.label}
-                  </option>
-                ))}
-              </select>
+                options={CITIES}
+                placeholder="Любой город"
+              />
             </FilterSection>
           )}
 
@@ -247,7 +235,7 @@ className=""
               placeholder="От"
               value={filters.minExp}
               onChange={(e) => handleFilterChange('minExp', e.target.value)}
-className=""
+              className="block w-full bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm px-3 py-2"
             />
           </FilterSection>
 
@@ -260,7 +248,7 @@ className=""
                 placeholder="От"
                 value={filters.priceMin}
                 onChange={(e) => handleFilterChange('priceMin', e.target.value)}
-  className=""
+                className="block w-full bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm px-3 py-2"
               />
               <input
                 type="number"
@@ -268,7 +256,7 @@ className=""
                 placeholder="До"
                 value={filters.priceMax}
                 onChange={(e) => handleFilterChange('priceMax', e.target.value)}
-  className=""
+                className="block w-full bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm px-3 py-2"
               />
             </div>
           </FilterSection>
@@ -276,18 +264,12 @@ className=""
 
         {/* Additional Filters */}
         <div className="mt-6 pt-6 border-t border-gray-200">
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="verifiedOnly"
-              checked={filters.verifiedOnly}
-              onChange={(e) => handleFilterChange('verifiedOnly', e.target.checked)}
-className=""
-            />
-            <label htmlFor="verifiedOnly" className="ml-2 text-sm text-gray-700">
-              Только верифицированные специалисты
-            </label>
-          </div>
+          <Checkbox
+            id="verifiedOnly"
+            checked={filters.verifiedOnly}
+            onChange={(e) => handleFilterChange('verifiedOnly', e.target.checked)}
+            label="Только верифицированные специалисты"
+          />
         </div>
       </div>
 
@@ -295,13 +277,13 @@ className=""
       {isMobileFiltersOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="fixed inset-0 bg-black bg-opacity-25" onClick={() => setIsMobileFiltersOpen(false)} />
-          <div className="fixed inset-y-0 right-0 w-full max-w-sm bg-white shadow-xl">
+          <div className="fixed inset-y-0 right-0 w-full max-w-sm bg-white shadow-xl specialists-filters">
             <div className="flex h-full flex-col">
               <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-                <h2 className="text-lg font-medium text-gray-900">Фильтры</h2>
+                <h2 className="text-heading-3">Фильтры</h2>
                 <button
                   onClick={() => setIsMobileFiltersOpen(false)}
-                  className="text-gray-400 hover:text-gray-500"
+                  className="btn-ghost btn-sm"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -318,23 +300,18 @@ className=""
                       placeholder="Поиск по имени или специализации..."
                       value={filters.q}
                       onChange={(e) => handleFilterChange('q', e.target.value)}
-        className=""
+                      className="block w-full bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm px-3 py-2"
                     />
                   </FilterSection>
 
                   {/* Category */}
                   <FilterSection title="Категория">
-                    <select
+                    <Select
                       value={filters.category}
                       onChange={(e) => handleFilterChange('category', e.target.value)}
-        className=""
-                    >
-                      {CATEGORIES.map((cat) => (
-                        <option key={cat.value} value={cat.value}>
-                          {cat.label}
-                        </option>
-                      ))}
-                    </select>
+                      options={CATEGORIES}
+                      placeholder="Все категории"
+                    />
                   </FilterSection>
 
                   {/* Format */}
@@ -345,17 +322,14 @@ className=""
                         { value: 'online', label: 'Только онлайн' },
                         { value: 'offline', label: 'Только офлайн' },
                       ].map((option) => (
-                        <label key={option.value} className="flex items-center">
-                          <input
-                            type="radio"
-                            name="format"
-                            value={option.value}
-                            checked={filters.format === option.value}
-                            onChange={(e) => handleFilterChange('format', e.target.value)}
-        className=""
-                          />
-                          <span className="ml-2 text-sm text-gray-700">{option.label}</span>
-                        </label>
+                        <Radio
+                          key={option.value}
+                          name="format"
+                          value={option.value}
+                          checked={filters.format === option.value}
+                          onChange={(e) => handleFilterChange('format', e.target.value)}
+                          label={option.label}
+                        />
                       ))}
                     </div>
                   </FilterSection>
@@ -363,17 +337,12 @@ className=""
                   {/* City (only for offline) */}
                   {filters.format === 'offline' && (
                     <FilterSection title="Город">
-                      <select
+                      <Select
                         value={filters.city}
                         onChange={(e) => handleFilterChange('city', e.target.value)}
-          className=""
-                      >
-                        {CITIES.map((city) => (
-                          <option key={city.value} value={city.value}>
-                            {city.label}
-                          </option>
-                        ))}
-                      </select>
+                        options={CITIES}
+                        placeholder="Любой город"
+                      />
                     </FilterSection>
                   )}
 
@@ -385,7 +354,7 @@ className=""
                       placeholder="От"
                       value={filters.minExp}
                       onChange={(e) => handleFilterChange('minExp', e.target.value)}
-        className=""
+                      className="block w-full bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm px-3 py-2"
                     />
                   </FilterSection>
 
@@ -398,7 +367,7 @@ className=""
                         placeholder="От"
                         value={filters.priceMin}
                         onChange={(e) => handleFilterChange('priceMin', e.target.value)}
-          className=""
+                        className="block w-full bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm px-3 py-2"
                       />
                       <input
                         type="number"
@@ -406,25 +375,19 @@ className=""
                         placeholder="До"
                         value={filters.priceMax}
                         onChange={(e) => handleFilterChange('priceMax', e.target.value)}
-          className=""
+                        className="block w-full bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm px-3 py-2"
                       />
                     </div>
                   </FilterSection>
 
                   {/* Verified Only */}
                   <FilterSection title="Дополнительно">
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="mobileVerifiedOnly"
-                        checked={filters.verifiedOnly}
-                        onChange={(e) => handleFilterChange('verifiedOnly', e.target.checked)}
-          className=""
-                      />
-                      <label htmlFor="mobileVerifiedOnly" className="ml-2 text-sm text-gray-700">
-                        Только верифицированные специалисты
-                      </label>
-                    </div>
+                    <Checkbox
+                      id="mobileVerifiedOnly"
+                      checked={filters.verifiedOnly}
+                      onChange={(e) => handleFilterChange('verifiedOnly', e.target.checked)}
+                      label="Только верифицированные специалисты"
+                    />
                   </FilterSection>
                 </div>
               </div>

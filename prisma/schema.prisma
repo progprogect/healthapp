@@ -26,6 +26,7 @@ model User {
   sessions                Session[]
   specialistCategories    SpecialistCategory[]
   specialistProfile       SpecialistProfile?
+  reviews                 Review[]             // Отзывы, которые оставил пользователь
 
   @@map("users")
 }
@@ -52,9 +53,27 @@ model SpecialistProfile {
   city            String?
   verified        Boolean  @default(false)
   avatarUrl       String?
+  
+  // Новые поля для улучшенного профиля
+  videoPresentationUrl    String?
+  videoThumbnailUrl       String?
+  galleryImages          Json        @default("[]") // [{url, alt, order}]
+  languages              Json        @default("[]") // ["ru", "en"]
+  ageGroups              Json        @default("[]") // ["children", "adults", "seniors"]
+  timezone               String?
+  averageRating          Float?      @default(0)
+  totalReviews           Int         @default(0)
+  
   createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  education       Education[]
+  publications    Publication[]
+  reviews         Review[]
 
+  @@index([verified, averageRating])
+  @@index([city, onlineOnly])
   @@map("specialist_profiles")
 }
 
@@ -93,6 +112,7 @@ model Request {
   createdAt       DateTime        @default(now())
   applications    Application[]
   chatThreads     ChatThread[]
+  reviews         Review[]        // Отзывы по этой заявке
   category        Category        @relation(fields: [categoryId], references: [id])
   client          User            @relation(fields: [clientUserId], references: [id], onDelete: Cascade)
 
@@ -199,14 +219,82 @@ enum PreferredFormat {
 }
 
 enum RequestStatus {
-  OPEN
-  MATCHED
-  CLOSED
-  CANCELLED
+  OPEN        // Открыта - новая заявка
+  IN_PROGRESS // В работе - специалист принял заявку
+  COMPLETED   // Завершена - работа выполнена
+  CANCELLED   // Отменена - заявка отменена
 }
 
 enum ApplicationStatus {
   SENT
   ACCEPTED
   DECLINED
+}
+
+// Новые модели для улучшенного профиля специалиста
+
+model Education {
+  id              String   @id @default(cuid())
+  specialistId    String
+  title           String
+  institution     String
+  degree          String?
+  year            Int?
+  documentUrl     String?
+  documentType    String   // "diploma", "certificate", "license"
+  isVerified      Boolean  @default(false)
+  verifiedAt      DateTime?
+  verifiedBy      String?  // ID админа, который верифицировал
+  createdAt       DateTime @default(now())
+  
+  specialist      SpecialistProfile @relation(fields: [specialistId], references: [userId], onDelete: Cascade)
+  
+  @@index([specialistId, isVerified])
+  @@map("education")
+}
+
+model Publication {
+  id              String   @id @default(cuid())
+  specialistId    String
+  title           String
+  url             String
+  type            PublicationType
+  year            Int?
+  isVerified      Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  
+  specialist      SpecialistProfile @relation(fields: [specialistId], references: [userId], onDelete: Cascade)
+  
+  @@index([specialistId, type])
+  @@map("publications")
+}
+
+model Review {
+  id              String   @id @default(cuid())
+  specialistId    String
+  clientId        String
+  requestId        String?
+  rating          Float    // 0-10
+  comment         String?
+  isVerified      Boolean  @default(false)
+  isPublic        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  
+  specialist      SpecialistProfile @relation(fields: [specialistId], references: [userId], onDelete: Cascade)
+  client          User             @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  request         Request?         @relation(fields: [requestId], references: [id])
+  
+  @@unique([specialistId, clientId, requestId])
+  @@index([specialistId, isPublic, createdAt])
+  @@index([rating, createdAt])
+  @@map("reviews")
+}
+
+enum PublicationType {
+  ARTICLE
+  BOOK
+  RESEARCH
+  BLOG_POST
+  PODCAST
+  VIDEO
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useSession } from 'next-auth/react';
 
@@ -45,13 +45,23 @@ export function useChatSocket(threadId?: string) {
   const onThreadUpdatedRef = useRef<((event: ThreadUpdatedEvent) => void) | null>(null);
 
   // Функция для подключения к Socket.IO
-  const connect = useCallback(() => {
+  const connect = useCallback(async () => {
     if (socketRef.current?.connected || status !== 'authenticated') {
       return;
     }
 
     try {
       console.log('Connecting to Socket.IO...');
+      
+      // Получаем user ID из NextAuth сессии
+      const response = await fetch('/api/auth/session');
+      const data = await response.json();
+      const userId = data.user?.id;
+      
+      if (!userId) {
+        console.error('No user ID in session, cannot connect to Socket.IO');
+        return;
+      }
       
       const socket = io(process.env.NODE_ENV === 'production' 
         ? process.env.NEXT_PUBLIC_SOCKET_URL || window.location.origin
@@ -60,6 +70,9 @@ export function useChatSocket(threadId?: string) {
         transports: ['websocket', 'polling'],
         timeout: 10000,
         forceNew: true,
+        auth: {
+          token: userId
+        }
       });
 
       socketRef.current = socket;
@@ -236,11 +249,12 @@ export function useUnreadCounter() {
     });
   }, []);
 
-  return {
+  // Мемоизируем возвращаемый объект для стабильной ссылки
+  return useMemo(() => ({
     unreadCount,
     threadCounts,
     updateThreadCount,
     resetThreadCount,
     isSocketConnected: isConnected,
-  };
+  }), [unreadCount, threadCounts, updateThreadCount, resetThreadCount, isConnected]);
 }

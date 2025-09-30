@@ -24,7 +24,7 @@ export interface Request {
   city?: string;
   budgetMinCents?: number;
   budgetMaxCents?: number;
-  status: 'open' | 'matched' | 'closed' | 'cancelled';
+  status: 'OPEN' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
   category: {
     slug: string;
     name: string;
@@ -39,7 +39,7 @@ export interface GetMyRequestsResponse {
 }
 
 export interface GetMyRequestsParams {
-  status?: 'open' | 'matched' | 'closed' | 'cancelled';
+  status?: 'OPEN' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
   limit?: number;
   offset?: number;
 }
@@ -53,13 +53,15 @@ export interface RequestFeedItem {
   city?: string;
   budgetMinCents?: number;
   budgetMaxCents?: number;
-  status: 'open' | 'matched' | 'closed' | 'cancelled';
+  status: 'OPEN' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
   category: {
     slug: string;
     name: string;
   };
   createdAt: string;
   updatedAt: string;
+  relevanceScore?: number;
+  relevanceReasons?: string[];
 }
 
 export interface GetRequestsFeedResponse {
@@ -72,7 +74,7 @@ export interface GetRequestsFeedParams {
   format?: 'online' | 'offline' | 'any';
   city?: string;
   q?: string;
-  status?: 'open' | 'matched' | 'closed' | 'cancelled';
+  status?: 'OPEN' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
   limit?: number;
   offset?: number;
 }

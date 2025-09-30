@@ -194,15 +194,15 @@ export function emitThreadUpdated(threadId: string, lastMessage: ThreadUpdatedEv
 
 // API route для Socket.IO (Next.js App Router)
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (res.socket?.server?.io) {
+  if ((res.socket as any)?.server?.io) {
     res.end();
     return;
   }
 
-  const httpServer = res.socket?.server as HTTPServer;
+  const httpServer = (res.socket as any)?.server as HTTPServer;
   const socketServer = initializeSocketIO(httpServer);
   
-  res.socket.server.io = socketServer;
+  (res.socket as any).server.io = socketServer;
   res.end();
 }
 

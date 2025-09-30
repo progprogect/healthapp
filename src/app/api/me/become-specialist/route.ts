@@ -36,7 +36,7 @@ export async function POST() {
       if (user.specialistProfile) {
         return {
           ok: true,
-          specialistProfileId: user.specialistProfile.id,
+          specialistProfileId: user.specialistProfile.userId,
           alreadyHadProfile: true
         };
       }
@@ -61,7 +61,7 @@ export async function POST() {
 
       return {
         ok: true,
-        specialistProfileId: specialistProfile.id,
+          specialistProfileId: specialistProfile.userId,
         alreadyHadProfile: false
       };
     });

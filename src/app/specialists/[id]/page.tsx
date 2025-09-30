@@ -2,10 +2,48 @@ import { notFound } from 'next/navigation';
 import { SpecialistProfile } from '@/types/specialist';
 import Link from 'next/link';
 import { Metadata } from 'next';
+import dynamic from 'next/dynamic';
 import StartChatButton from '@/components/StartChatButton';
 import Providers from '@/components/Providers';
 import AvatarImage from '@/components/AvatarImage';
 import { prisma } from '@/lib/prisma';
+
+// Lazy load тяжелых компонентов
+const VideoPresentation = dynamic(() => import('@/components/specialist/VideoPresentation'), {
+  loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-64" />
+});
+
+const ImageGalleryDisplay = dynamic(() => import('@/components/specialist/ImageGalleryDisplay'), {
+  loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-48" />
+});
+
+const EducationCard = dynamic(() => import('@/components/specialist/EducationCard'), {
+  loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-32" />
+});
+
+const PublicationCard = dynamic(() => import('@/components/specialist/PublicationCard'), {
+  loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-32" />
+});
+
+const ReviewCard = dynamic(() => import('@/components/specialist/ReviewCard'), {
+  loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-24" />
+});
+
+const RatingDisplay = dynamic(() => import('@/components/specialist/RatingDisplay'), {
+  loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-6 w-24" />
+});
+
+const SpecialistBadges = dynamic(() => import('@/components/specialist/SpecialistBadges'), {
+  loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-8 w-32" />
+});
+
+const TimezoneDisplay = dynamic(() => import('@/components/specialist/TimezoneDisplay'), {
+  loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-4 w-20" />
+});
+
+const ReviewsList = dynamic(() => import('@/components/ReviewsList'), {
+  loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-32" />
+});
 
 // Функция для получения данных профиля специалиста через Prisma
 async function getSpecialistProfile(id: string): Promise<SpecialistProfile | null> {
@@ -26,7 +64,33 @@ async function getSpecialistProfile(id: string): Promise<SpecialistProfile | nul
         }
       },
       include: {
-        specialistProfile: true,
+        specialistProfile: {
+          include: {
+            education: {
+              where: { isVerified: true },
+              orderBy: { createdAt: 'desc' }
+            },
+            publications: {
+              where: { isVerified: true },
+              orderBy: { createdAt: 'desc' }
+            },
+            reviews: {
+              where: { 
+                isPublic: true, 
+                isVerified: true 
+              },
+              include: {
+                client: {
+                  include: {
+                    clientProfile: true
+                  }
+                }
+              },
+              orderBy: { createdAt: 'desc' },
+              take: 10
+            }
+          }
+        },
         specialistCategories: {
           include: {
             category: true
@@ -56,7 +120,56 @@ async function getSpecialistProfile(id: string): Promise<SpecialistProfile | nul
       })),
       verified: specialist.specialistProfile.verified,
       avatarUrl: specialist.specialistProfile.avatarUrl,
-      createdAt: specialist.specialistProfile.createdAt.toISOString()
+      createdAt: specialist.specialistProfile.createdAt.toISOString(),
+      updatedAt: specialist.specialistProfile.updatedAt.toISOString(),
+      
+      // Новые поля
+      videoPresentationUrl: specialist.specialistProfile.videoPresentationUrl || undefined,
+      videoThumbnailUrl: specialist.specialistProfile.videoThumbnailUrl || undefined,
+      galleryImages: specialist.specialistProfile.galleryImages as any[] || [],
+      languages: specialist.specialistProfile.languages as string[] || [],
+      ageGroups: specialist.specialistProfile.ageGroups as string[] || [],
+      timezone: specialist.specialistProfile.timezone || undefined,
+      averageRating: specialist.specialistProfile.averageRating || 0,
+      totalReviews: specialist.specialistProfile.totalReviews || 0,
+      
+      // Связанные данные
+      education: specialist.specialistProfile.education.map(edu => ({
+        id: edu.id,
+        title: edu.title,
+        institution: edu.institution,
+        degree: edu.degree || undefined,
+        year: edu.year || undefined,
+        documentUrl: edu.documentUrl || undefined,
+        documentType: edu.documentType,
+        isVerified: edu.isVerified,
+        verifiedAt: edu.verifiedAt?.toISOString(),
+        verifiedBy: edu.verifiedBy || undefined,
+        createdAt: edu.createdAt.toISOString()
+      })),
+      
+      publications: specialist.specialistProfile.publications.map(pub => ({
+        id: pub.id,
+        title: pub.title,
+        url: pub.url,
+        type: pub.type as any,
+        year: pub.year || undefined,
+        isVerified: pub.isVerified,
+        createdAt: pub.createdAt.toISOString()
+      })),
+      
+      reviews: specialist.specialistProfile.reviews.map(review => ({
+        id: review.id,
+        rating: review.rating,
+        comment: review.comment || undefined,
+        isVerified: review.isVerified,
+        isPublic: review.isPublic,
+        createdAt: review.createdAt.toISOString(),
+        client: {
+          id: review.client.id,
+          displayName: review.client.clientProfile?.displayName || review.client.email
+        }
+      }))
     };
 
     return profile;
@@ -84,14 +197,32 @@ export async function generateMetadata({
 
   const categories = specialist.categories.map(cat => cat.name).join(', ');
   const location = specialist.onlineOnly ? 'Онлайн' : specialist.city || 'Онлайн + Офлайн';
+  const languages = specialist.languages.length > 0 ? ` Языки: ${specialist.languages.join(', ')}.` : '';
+  const rating = specialist.totalReviews > 0 ? ` Рейтинг: ${specialist.averageRating.toFixed(1)}/10 (${specialist.totalReviews} отзывов).` : '';
+  
+  const description = `${specialist.bio} ${categories}. ${location}. Опыт: ${specialist.experienceYears} лет.${languages}${rating}`;
   
   return {
     title: `${specialist.displayName} | ${categories} | HealthApp`,
-    description: `${specialist.bio} ${categories}. ${location}. Опыт: ${specialist.experienceYears} лет.`,
+    description: description,
     openGraph: {
       title: `${specialist.displayName} | ${categories}`,
       description: specialist.bio,
       type: 'profile',
+      images: specialist.avatarUrl ? [
+        {
+          url: specialist.avatarUrl,
+          width: 400,
+          height: 400,
+          alt: specialist.displayName,
+        }
+      ] : [],
+    },
+    twitter: {
+      card: 'summary',
+      title: `${specialist.displayName} | ${categories}`,
+      description: specialist.bio,
+      images: specialist.avatarUrl ? [specialist.avatarUrl] : [],
     },
   };
 }
@@ -124,8 +255,8 @@ async function SpecialistProfileComponent({ id }: { id: string }) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      {/* Header */}
+    <div className="max-w-6xl mx-auto">
+      {/* Hero Section */}
       <div className="bg-white rounded-lg shadow-md p-6 sm:p-8 mb-6">
         <div className="flex items-start space-x-6 mb-6">
           <div className="flex-shrink-0">
@@ -147,6 +278,14 @@ async function SpecialistProfileComponent({ id }: { id: string }) {
               )}
             </div>
             
+            {/* Rating */}
+            <div className="mb-4">
+              <RatingDisplay 
+                rating={specialist.averageRating} 
+                totalReviews={specialist.totalReviews}
+              />
+            </div>
+            
             <div className="text-base sm:text-lg text-gray-600 mb-4">
               {specialist.bio}
             </div>
@@ -166,41 +305,102 @@ async function SpecialistProfileComponent({ id }: { id: string }) {
                 </div>
               </div>
             )}
+
+            {/* Languages and Age Groups */}
+            <SpecialistBadges 
+              languages={specialist.languages}
+              ageGroups={specialist.ageGroups}
+            />
           </div>
         </div>
 
         {/* Key Info Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <div className="text-xl sm:text-2xl font-bold text-indigo-600 mb-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="text-center card-muted p-6">
+            <div className="text-heading-2 text-indigo-600 mb-2">
               {specialist.experienceYears}
             </div>
-            <div className="text-sm text-gray-600">лет опыта</div>
+            <div className="text-body-sm">лет опыта</div>
           </div>
           
-          <div className="text-center p-4 bg-gray-50 rounded-lg">
-            <div className="text-lg sm:text-xl font-bold text-indigo-600 mb-1 break-words">
+          <div className="text-center card-muted p-6">
+            <div className="text-heading-3 text-indigo-600 mb-2 break-words">
               {formatPriceRange(specialist.priceMinCents, specialist.priceMaxCents)}
             </div>
-            <div className="text-sm text-gray-600">за сессию</div>
+            <div className="text-body-sm">за сессию</div>
           </div>
           
-          <div className="text-center p-4 bg-gray-50 rounded-lg sm:col-span-2 lg:col-span-1">
-            <div className="text-lg sm:text-xl font-bold text-indigo-600 mb-1 break-words">
+          <div className="text-center card-muted p-6">
+            <div className="text-heading-3 text-indigo-600 mb-2 break-words">
               {getLocationText()}
             </div>
-            <div className="text-sm text-gray-600">формат работы</div>
+            <div className="text-body-sm">формат работы</div>
           </div>
+
+          {/* Timezone */}
+          {specialist.timezone && (
+            <div className="text-center card-muted p-6">
+              <TimezoneDisplay timezone={specialist.timezone} />
+            </div>
+          )}
         </div>
       </div>
 
+      {/* Video Presentation */}
+      {specialist.videoPresentationUrl && (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <VideoPresentation
+            videoUrl={specialist.videoPresentationUrl}
+            thumbnailUrl={specialist.videoThumbnailUrl}
+            specialistName={specialist.displayName}
+          />
+        </div>
+      )}
+
+      {/* Gallery */}
+      {specialist.galleryImages && specialist.galleryImages.length > 0 && (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <ImageGalleryDisplay
+            images={specialist.galleryImages}
+            specialistName={specialist.displayName}
+          />
+        </div>
+      )}
+
+      {/* Education */}
+      {specialist.education && specialist.education.length > 0 && (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">Образование и сертификаты</h3>
+          <div className="space-y-4">
+            {specialist.education.map((edu) => (
+              <EducationCard key={edu.id} education={edu} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Publications */}
+      {specialist.publications && specialist.publications.length > 0 && (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">Публикации</h3>
+          <div className="space-y-4">
+            {specialist.publications.map((pub) => (
+              <PublicationCard key={pub.id} publication={pub} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Reviews */}
+      <ReviewsList specialistId={specialist.id} className="mb-6" />
+
       {/* Actions */}
-      <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+      <div className="card-elevated p-6">
+        <div className="flex flex-col sm:flex-row gap-4">
           <Providers>
             <StartChatButton specialistId={specialist.id} />
           </Providers>
-          <button className="flex-1 bg-indigo-600 text-white px-4 sm:px-6 py-3 rounded-md text-base sm:text-lg font-medium hover:bg-indigo-700 transition-colors">
+          <button className="flex-1 btn btn-primary btn-lg">
             Записаться на консультацию
           </button>
         </div>

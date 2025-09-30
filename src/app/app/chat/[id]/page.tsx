@@ -50,27 +50,27 @@ export default async function ChatPage({
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white shadow">
+      <div className="card-elevated">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-6">
               <Link 
                 href="/app/chat"
-                className="text-gray-600 hover:text-gray-900"
+                className="btn-ghost btn-sm"
               >
                 ← Назад к чатам
               </Link>
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-medium text-indigo-600">
+              <div className="flex items-center space-x-4">
+                <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                  <span className="text-base font-medium text-indigo-600">
                     {peerProfile?.displayName?.charAt(0) || peer.email?.charAt(0) || '?'}
                   </span>
                 </div>
                 <div>
-                  <h1 className="text-lg font-semibold text-gray-900">
+                  <h1 className="text-heading-3">
                     {peerProfile?.displayName || peer.email}
                   </h1>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-body-sm text-gray-500">
                     {isClient ? 'Специалист' : 'Клиент'}
                   </p>
                 </div>
@@ -79,7 +79,7 @@ export default async function ChatPage({
             <div className="flex items-center space-x-4">
               <Link
                 href="/app"
-                className="text-gray-600 hover:text-gray-900"
+                className="btn-ghost btn-sm"
               >
                 Личный кабинет
               </Link>
@@ -90,7 +90,7 @@ export default async function ChatPage({
 
       {/* Chat Interface */}
       <div className="max-w-4xl mx-auto h-[calc(100vh-4rem)]">
-        <div className="bg-white rounded-lg shadow-md h-full flex flex-col">
+        <div className="card-elevated h-full flex flex-col">
           <ChatInterface threadId={threadId} />
         </div>
       </div>

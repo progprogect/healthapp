@@ -86,3 +86,4 @@ test.describe('Chat: send/receive', () => {
     await expect(page.getByText('Здравствуйте! Рад помочь. Расскажите подробнее о вашей ситуации.')).toBeVisible();
   });
 });
+

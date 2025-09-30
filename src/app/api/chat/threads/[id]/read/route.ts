@@ -78,7 +78,7 @@ export async function POST(
 
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Неверные параметры запроса', details: error.errors }, { status: 400 });
+      return NextResponse.json({ error: 'Неверные параметры запроса', details: error.issues }, { status: 400 });
     }
     
     console.error('Error marking messages as read:', error);

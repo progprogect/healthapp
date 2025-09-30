@@ -5,6 +5,7 @@ import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Providers from "@/components/Providers"
+import Input from "@/components/ui/Input"
 
 function LoginForm() {
   const [email, setEmail] = useState("")
@@ -55,41 +56,29 @@ function LoginForm() {
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="rounded-t-md rounded-b-none"
-                placeholder="Email адрес"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                data-testid="login-email"
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Пароль
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                className="rounded-b-md rounded-t-none"
-                placeholder="Пароль"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                data-testid="login-password"
-              />
-            </div>
+          <div className="space-y-4">
+            <Input
+              label="Email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              placeholder="Email адрес"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              data-testid="login-email"
+            />
+            <Input
+              label="Пароль"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              required
+              placeholder="Пароль"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              data-testid="login-password"
+            />
           </div>
 
           {error && (

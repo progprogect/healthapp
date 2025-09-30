@@ -29,13 +29,13 @@ export default function SpecialistCard({ specialist }: SpecialistCardProps) {
   return (
     <Link 
       href={`/specialists/${specialist.id}`}
-      className="block bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 p-6 h-full"
+      className="block card-interactive p-6 h-full"
       data-testid="specialist-card"
       data-id={specialist.id}
     >
       <div className="flex flex-col h-full">
         {/* Avatar and Header */}
-        <div className="flex items-start space-x-3 mb-3">
+        <div className="flex items-start space-x-3 mb-4">
           <div className="flex-shrink-0">
             <AvatarImage
               src={specialist.avatarUrl}
@@ -45,7 +45,7 @@ export default function SpecialistCard({ specialist }: SpecialistCardProps) {
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between">
-              <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
+              <h3 className="text-heading-4 line-clamp-2">
                 {specialist.displayName}
               </h3>
               {specialist.verified && (
@@ -59,12 +59,12 @@ export default function SpecialistCard({ specialist }: SpecialistCardProps) {
 
         {/* Categories */}
         {specialist.categories.length > 0 && (
-          <div className="mb-3">
+          <div className="mb-4">
             <div className="flex flex-wrap gap-1">
               {specialist.categories.slice(0, 2).map((category, index) => (
                 <span
                   key={index}
-                  className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                  className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
                 >
                   {category}
                 </span>
@@ -79,8 +79,8 @@ export default function SpecialistCard({ specialist }: SpecialistCardProps) {
         )}
 
         {/* Location and format */}
-        <div className="mb-3">
-          <div className="flex items-center text-sm text-gray-600">
+        <div className="mb-4">
+          <div className="flex items-center text-body-sm">
             <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -90,15 +90,15 @@ export default function SpecialistCard({ specialist }: SpecialistCardProps) {
         </div>
 
         {/* Experience */}
-        <div className="mb-3">
-          <div className="text-sm text-gray-600">
+        <div className="mb-4">
+          <div className="text-body-sm">
             <span className="font-medium">Опыт:</span> {specialist.experienceYears} лет
           </div>
         </div>
 
         {/* Price */}
-        <div className="mb-4">
-          <div className="text-sm text-gray-600">
+        <div className="mb-6">
+          <div className="text-body-sm">
             <span className="font-medium">Цена:</span> {formatPriceRange(specialist.priceMinCents, specialist.priceMaxCents)}
           </div>
         </div>
@@ -106,7 +106,7 @@ export default function SpecialistCard({ specialist }: SpecialistCardProps) {
         {/* Footer with CTA */}
         <div className="mt-auto">
           <div className="text-center">
-            <span className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition-colors">
+            <span className="btn-outline btn-md">
               Подробнее
             </span>
           </div>

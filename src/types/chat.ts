@@ -3,6 +3,15 @@ export interface CreateThreadRequest {
   requestId?: string | null;
 }
 
+export interface CreateThreadResponse {
+  thread: ChatThread;
+}
+
+export interface GetThreadsResponse {
+  threads: ChatThread[];
+  total: number;
+}
+
 export interface ChatThread {
   id: string;
   clientId: string;
@@ -10,6 +19,13 @@ export interface ChatThread {
   requestId?: string | null;
   createdAt: string;
   updatedAt: string;
+  lastMessage?: ChatMessage;
+  peer?: {
+    id: string;
+    displayName: string;
+    avatarUrl?: string;
+  };
+  unreadCount?: number;
 }
 
 export interface ChatMessage {
@@ -20,3 +36,26 @@ export interface ChatMessage {
   createdAt: string;
   readAt?: string | null;
 }
+
+export interface SendMessageRequest {
+  threadId: string;
+  content: string;
+  attachmentUrl?: string;
+}
+
+export interface SendMessageResponse {
+  message: ChatMessage;
+}
+
+export interface GetMessagesResponse {
+  messages: ChatMessage[];
+}
+
+export interface MarkAsReadRequest {
+  threadId: string;
+}
+
+export interface MarkAsReadResponse {
+  success: boolean;
+}
+

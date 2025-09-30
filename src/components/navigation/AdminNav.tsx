@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 
-export default function AdminNav() {
+function AdminNav() {
   const { data: session } = useSession();
   const pathname = usePathname();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -84,3 +84,5 @@ export default function AdminNav() {
     </>
   );
 }
+
+export default memo(AdminNav);

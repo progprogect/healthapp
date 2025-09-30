@@ -7,6 +7,10 @@ declare module "next-auth" {
       email: string
       role: string
       name?: string
+      profiles?: {
+        hasClient: boolean
+        hasSpecialist: boolean
+      }
     }
   }
 
@@ -15,11 +19,19 @@ declare module "next-auth" {
     email: string
     role: string
     name?: string
+    profiles?: {
+      hasClient: boolean
+      hasSpecialist: boolean
+    }
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
     role: string
+    profiles?: {
+      hasClient: boolean
+      hasSpecialist: boolean
+    }
   }
 }

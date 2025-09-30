@@ -7,8 +7,8 @@ import { z } from 'zod';
 const adminSpecialistsParamsSchema = z.object({
   q: z.string().optional(), // поиск по имени/email
   verified: z.enum(['true', 'false', 'all']).default('all'),
-  limit: z.string().transform(Number).default('20'),
-  offset: z.string().transform(Number).default('0'),
+  limit: z.string().transform(Number).default(20),
+  offset: z.string().transform(Number).default(0),
 });
 
 // GET /api/admin/specialists - получить список специалистов для админа
@@ -40,7 +40,7 @@ export async function GET(request: Request) {
 
     if (!validatedParams.success) {
       return NextResponse.json(
-        { error: "Неверные параметры запроса", details: validatedParams.error.errors },
+        { error: "Неверные параметры запроса", details: validatedParams.error.issues },
         { status: 400 }
       );
     }

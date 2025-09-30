@@ -24,7 +24,14 @@ export default function ChatThreadList() {
           if (thread.id === event.threadId) {
             return {
               ...thread,
-              lastMessage: event.lastMessage,
+              lastMessage: event.lastMessage ? {
+                id: event.lastMessage.id,
+                threadId: thread.id,
+                senderId: event.lastMessage.senderId,
+                content: event.lastMessage.body,
+                createdAt: event.lastMessage.createdAt,
+                readAt: null
+              } : undefined,
               unreadCount: event.unreadCount,
               updatedAt: event.lastMessage?.createdAt || thread.updatedAt,
             };
@@ -61,7 +68,7 @@ export default function ChatThreadList() {
       }
 
       const data: GetThreadsResponse = await response.json()
-      setThreads(data.items)
+      setThreads(data.threads)
       setTotal(data.total)
     } catch (error) {
       console.error('Error fetching threads:', error)
@@ -79,10 +86,10 @@ export default function ChatThreadList() {
     if (!message) return 'Нет сообщений'
     
     const maxLength = 50
-    if (message.body.length <= maxLength) {
-      return message.body
+    if (message.content.length <= maxLength) {
+      return message.content
     }
-    return message.body.substring(0, maxLength) + '...'
+    return message.content.substring(0, maxLength) + '...'
   }
 
   const formatTime = (dateString: string) => {
@@ -190,7 +197,7 @@ export default function ChatThreadList() {
             <div className="flex-shrink-0">
               <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
                 <span className="text-indigo-600 font-medium text-sm">
-                  {getInitials(thread.peer.displayName)}
+                  {getInitials(thread.peer?.displayName || 'Unknown')}
                 </span>
               </div>
             </div>
@@ -199,15 +206,15 @@ export default function ChatThreadList() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-medium text-gray-900 truncate">
-                  {thread.peer.displayName}
+                  {thread.peer?.displayName || 'Unknown'}
                 </h3>
                 <div className="flex items-center space-x-2">
                   <span className="text-xs text-gray-500">
                     {formatTime(thread.updatedAt)}
                   </span>
-                  {thread.unreadCount > 0 && (
+                  {(thread.unreadCount || 0) > 0 && (
                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                      {thread.unreadCount}
+                      {thread.unreadCount || 0}
                     </span>
                   )}
                 </div>

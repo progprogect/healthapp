@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
@@ -9,7 +9,7 @@ interface SpecialistNavProps {
   unreadCount?: number;
 }
 
-export default function SpecialistNav({ unreadCount = 0 }: SpecialistNavProps) {
+function SpecialistNav({ unreadCount = 0 }: SpecialistNavProps) {
   const { data: session } = useSession();
   const pathname = usePathname();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -40,6 +40,17 @@ export default function SpecialistNav({ unreadCount = 0 }: SpecialistNavProps) {
         data-testid="nav-opportunities"
       >
         Заявки клиентов
+      </Link>
+      
+      <Link 
+        href="/app/applications" 
+        className={`transition-colors ${
+          isActive('/app/applications') 
+            ? 'text-indigo-600 font-medium' 
+            : 'text-gray-600 hover:text-gray-900'
+        }`}
+      >
+        Мои отклики
       </Link>
       
       <Link 
@@ -116,3 +127,5 @@ export default function SpecialistNav({ unreadCount = 0 }: SpecialistNavProps) {
     </>
   );
 }
+
+export default memo(SpecialistNav);

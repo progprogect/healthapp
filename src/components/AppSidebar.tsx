@@ -27,6 +27,7 @@ export default function AppSidebar() {
       case 'SPECIALIST':
         return [
           { href: '/app/opportunities', label: 'Заявки клиентов', icon: '🎯' },
+          { href: '/app/applications', label: 'Мои отклики', icon: '📝' },
           { href: '/app/chat', label: 'Чат', icon: '💬' },
           { href: '/app/specialist/profile/edit', label: 'Профиль', icon: '👤' },
           { href: '/specialists', label: 'Каталог', icon: '👥' },

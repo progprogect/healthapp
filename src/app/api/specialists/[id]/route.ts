@@ -61,7 +61,24 @@ export async function GET(
       })),
       verified: specialist.specialistProfile.verified,
       avatarUrl: specialist.specialistProfile.avatarUrl,
-      createdAt: specialist.specialistProfile.createdAt.toISOString()
+      
+      // Новые поля
+      videoPresentationUrl: specialist.specialistProfile.videoPresentationUrl || undefined,
+      videoThumbnailUrl: specialist.specialistProfile.videoThumbnailUrl || undefined,
+      galleryImages: specialist.specialistProfile.galleryImages as any[] || [],
+      languages: specialist.specialistProfile.languages as string[] || [],
+      ageGroups: specialist.specialistProfile.ageGroups as string[] || [],
+      timezone: specialist.specialistProfile.timezone || undefined,
+      averageRating: specialist.specialistProfile.averageRating || 0,
+      totalReviews: specialist.specialistProfile.totalReviews || 0,
+      
+      // Связанные данные
+      education: [],
+      publications: [],
+      reviews: [],
+      
+      createdAt: specialist.specialistProfile.createdAt.toISOString(),
+      updatedAt: specialist.specialistProfile.updatedAt.toISOString()
     };
 
     return NextResponse.json(profile, { status: 200 });

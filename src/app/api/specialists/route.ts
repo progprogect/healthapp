@@ -11,10 +11,10 @@ const specialistSearchParamsSchema = z.object({
   priceMin: z.string().transform(Number).optional(),
   priceMax: z.string().transform(Number).optional(),
   q: z.string().optional(),
-  verifiedOnly: z.string().transform(val => val === 'true').default('true'),
+  verifiedOnly: z.string().transform(val => val === 'true').default(true),
   sort: z.enum(['recent', 'price_asc', 'price_desc']).default('recent'),
-  limit: z.string().transform(Number).default('20'),
-  offset: z.string().transform(Number).default('0'),
+  limit: z.string().transform(Number).default(20),
+  offset: z.string().transform(Number).default(0),
 });
 
 export async function GET(request: Request) {
@@ -26,7 +26,7 @@ export async function GET(request: Request) {
 
     if (!validatedParams.success) {
       return NextResponse.json(
-        { error: "Неверные параметры запроса", details: validatedParams.error.errors },
+        { error: "Неверные параметры запроса", details: validatedParams.error.issues },
         { status: 400 }
       );
     }

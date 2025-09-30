@@ -4,8 +4,11 @@ import { compare } from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 
 const authOptions = {
-  debug: true,
-  session: { strategy: "jwt" as const },
+  debug: process.env.NODE_ENV === 'development',
+  session: { 
+    strategy: "jwt" as const,
+    maxAge: 30 * 24 * 60 * 60, // 30 дней
+  },
   providers: [
     Credentials({
       name: "Email & Password",
@@ -41,7 +44,11 @@ const authOptions = {
           id: user.id,
           email: user.email,
           role: user.role,
-          name: user.clientProfile?.displayName || user.specialistProfile?.displayName || user.email
+          name: user.clientProfile?.displayName || user.specialistProfile?.displayName || user.email,
+          profiles: {
+            hasClient: !!user.clientProfile,
+            hasSpecialist: !!user.specialistProfile
+          }
         }
       },
     }),
@@ -50,21 +57,21 @@ const authOptions = {
     signIn: "/auth/login",
   },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.role = user.role
-      }
-      return token
-    },
-    async session({ session, token }) {
-      if (token) {
-        // @ts-ignore
-        session.user.id = token.sub
-        // @ts-ignore
-        session.user.role = token.role
-      }
-      return session
-    },
+        async jwt({ token, user }: { token: any; user: any }) {
+          if (user) {
+            token.role = user.role
+            token.profiles = user.profiles
+          }
+          return token
+        },
+        async session({ session, token }: { session: any; token: any }) {
+          if (token) {
+            session.user.id = token.sub
+            session.user.role = token.role
+            session.user.profiles = token.profiles
+          }
+          return session
+        },
   },
   secret: process.env.NEXTAUTH_SECRET,
 }

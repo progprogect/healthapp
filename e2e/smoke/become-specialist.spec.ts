@@ -101,3 +101,4 @@ test.describe('Become specialist + edit profile', () => {
     await expect(page.getByText('Укажите город для офлайн встреч')).toBeVisible();
   });
 });
+

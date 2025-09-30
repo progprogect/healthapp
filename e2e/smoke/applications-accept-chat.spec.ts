@@ -78,3 +78,4 @@ test.describe('Client: see & accept application → chat', () => {
     await expect(applicationCard.getByTestId('decline-application')).toBeVisible();
   });
 });
+

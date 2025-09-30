@@ -7,9 +7,9 @@ import { GetMyRequestsResponse, GetMyRequestsParams } from '@/types/request';
 
 // Schema для параметров запроса заявок
 const getMyRequestsSchema = z.object({
-  status: z.enum(['open', 'matched', 'closed', 'cancelled']).optional(),
-  limit: z.string().transform(Number).default('20'),
-  offset: z.string().transform(Number).default('0'),
+  status: z.enum(['OPEN', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']).optional(),
+  limit: z.string().transform(Number).default(20),
+  offset: z.string().transform(Number).default(0),
 });
 
 // GET /api/requests/mine - получить заявки текущего клиента
@@ -17,18 +17,23 @@ export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
     
+    console.log('Session in /api/requests/mine:', session);
+    
     if (!session?.user?.id) {
+      console.log('No session or user ID found');
       return NextResponse.json({ error: 'Не авторизован' }, { status: 401 });
     }
 
-    // Проверяем, что пользователь - клиент
+    // Проверяем, что пользователь существует
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      include: { clientProfile: true }
+      where: { id: session.user.id }
     });
 
-    if (!user || user.role !== 'CLIENT' || !user.clientProfile) {
-      return NextResponse.json({ error: 'Только клиенты могут просматривать свои заявки' }, { status: 403 });
+    console.log('User found:', user);
+
+    if (!user) {
+      console.log('User not found in database');
+      return NextResponse.json({ error: 'Пользователь не найден' }, { status: 404 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -48,11 +53,19 @@ export async function GET(request: Request) {
       whereCondition.status = status;
     }
 
-    // Получаем заявки
+    // Получаем заявки с полной информацией
     const requests = await prisma.request.findMany({
       where: whereCondition,
       include: {
-        category: true
+        category: true,
+        applications: {
+          where: { status: 'ACCEPTED' },
+          include: {
+            specialist: {
+              include: { specialistProfile: true }
+            }
+          }
+        }
       },
       orderBy: { createdAt: 'desc' },
       skip: offsetNum,
@@ -64,7 +77,7 @@ export async function GET(request: Request) {
       id: req.id,
       title: req.title,
       description: req.description,
-      preferredFormat: req.preferredFormat,
+        preferredFormat: req.preferredFormat.toLowerCase() as 'online' | 'offline' | 'any',
       city: req.city,
       budgetMinCents: req.budgetMinCents,
       budgetMaxCents: req.budgetMaxCents,
@@ -73,7 +86,17 @@ export async function GET(request: Request) {
         slug: req.category.slug,
         name: req.category.name
       },
-      createdAt: req.createdAt.toISOString()
+      createdAt: req.createdAt.toISOString(),
+      updatedAt: req.createdAt.toISOString(), // Use createdAt as updatedAt since updatedAt is not in the query
+      applications: req.applications.map(app => ({
+        id: app.id,
+        status: app.status,
+        specialist: {
+          id: app.specialist.id,
+          displayName: app.specialist.specialistProfile?.displayName || app.specialist.email.split('@')[0],
+          avatarUrl: app.specialist.specialistProfile?.avatarUrl
+        }
+      }))
     }));
 
     const total = await prisma.request.count({ where: whereCondition });
@@ -82,7 +105,7 @@ export async function GET(request: Request) {
 
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Неверные параметры запроса', details: error.errors }, { status: 400 });
+      return NextResponse.json({ error: 'Неверные параметры запроса', details: error.issues }, { status: 400 });
     }
     
     console.error('Error fetching requests:', error);

@@ -24,7 +24,7 @@ export async function POST(
       include: {
         request: {
           include: {
-            clientUser: true
+            client: true
           }
         }
       }
@@ -40,14 +40,14 @@ export async function POST(
     }
 
     // Проверяем статус отклика
-    if (application.status !== 'PENDING') {
+    if (application.status !== 'SENT') {
       return NextResponse.json({ error: 'Отклик уже обработан' }, { status: 400 });
     }
 
     // Обновляем статус отклика
     await prisma.application.update({
       where: { id: applicationId },
-      data: { status: 'REJECTED' }
+      data: { status: 'DECLINED' }
     });
 
     return NextResponse.json({

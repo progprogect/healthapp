@@ -315,7 +315,7 @@ export default function RequestDetailPage({ params }: RequestDetailPageProps) {
                     </div>
                   )}
 
-                  {application.status === 'pending' && (
+                  {application.status === 'sent' && (
                     <div className="flex justify-end space-x-3">
                       <button
                         onClick={() => handleDeclineApplication(application.id)}
@@ -342,7 +342,7 @@ export default function RequestDetailPage({ params }: RequestDetailPageProps) {
                     </div>
                   )}
 
-                  {application.status === 'rejected' && (
+                  {application.status === 'declined' && (
                     <div className="flex justify-end">
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
                         ✗ Отклонен

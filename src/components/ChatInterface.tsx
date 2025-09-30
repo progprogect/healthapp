@@ -11,7 +11,7 @@ interface ChatInterfaceProps {
 
 export default function ChatInterface({ threadId }: ChatInterfaceProps) {
   const { data: session } = useSession();
-  const [messages, setMessages] = useState<GetMessagesResponse['items']>([]);
+  const [messages, setMessages] = useState<GetMessagesResponse['messages']>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [sending, setSending] = useState(false);
@@ -57,17 +57,17 @@ export default function ChatInterface({ threadId }: ChatInterfaceProps) {
         // Загружаем более старые сообщения - избегаем дубликатов
         setMessages(prev => {
           const existingIds = new Set(prev.map(msg => msg.id));
-          const newMessages = data.items.filter(msg => !existingIds.has(msg.id));
+          const newMessages = data.messages.filter(msg => !existingIds.has(msg.id));
           return [...newMessages, ...prev];
         });
         setLoadingMore(false);
       } else {
         // Первая загрузка или обновление
-        setMessages(data.items);
+        setMessages(data.messages);
         setLoading(false);
       }
       
-      setHasMore(data.hasMore);
+      setHasMore(false); // hasMore не используется в новом API
     } catch (error) {
       console.error('Error fetching messages:', error);
       setError(error instanceof Error ? error.message : 'Ошибка загрузки сообщений');
@@ -90,7 +90,8 @@ export default function ChatInterface({ threadId }: ChatInterfaceProps) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          body: messageText.trim(),
+          threadId: threadId,
+          content: messageText.trim(),
         } as SendMessageRequest),
       });
 
@@ -137,11 +138,11 @@ export default function ChatInterface({ threadId }: ChatInterfaceProps) {
           if (!exists) {
             return [...prev, {
               id: event.message.id,
+              threadId: event.threadId,
               senderId: event.message.senderId,
-              body: event.message.body,
-              attachmentUrl: null,
+              content: event.message.body,
               createdAt: event.message.createdAt,
-              isRead: event.message.senderId === session?.user?.id,
+              readAt: event.message.senderId === session?.user?.id ? event.message.createdAt : null,
             }];
           }
           return prev;
@@ -154,7 +155,7 @@ export default function ChatInterface({ threadId }: ChatInterfaceProps) {
         // Обновляем статус прочтения сообщений
         setMessages(prev => prev.map(msg => ({
           ...msg,
-          isRead: msg.senderId === event.readerId ? true : msg.isRead,
+          readAt: msg.senderId === event.readerId ? new Date().toISOString() : msg.readAt,
         })));
       }
     });
@@ -229,10 +230,10 @@ export default function ChatInterface({ threadId }: ChatInterfaceProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Статус подключения */}
-      <div className="px-4 py-2 bg-gray-50 border-b">
-        <div className="flex items-center space-x-2 text-sm">
-          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-          <span className="text-gray-600">
+      <div className="px-6 py-3 bg-gray-50 border-b">
+        <div className="flex items-center space-x-3">
+          <div className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+          <span className="text-body-sm text-gray-600">
             {isConnected ? 'Подключено' : 'Подключение...'}
             {fallbackToPolling && ' (режим обновления)'}
           </span>
@@ -240,13 +241,13 @@ export default function ChatInterface({ threadId }: ChatInterfaceProps) {
       </div>
 
       {/* Сообщения */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {hasMore && (
           <div className="text-center">
             <button
               onClick={loadMoreMessages}
               disabled={loadingMore}
-              className="text-indigo-600 hover:text-indigo-800 text-sm"
+              className="btn-outline btn-sm"
             >
               {loadingMore ? 'Загрузка...' : 'Загрузить предыдущие сообщения'}
             </button>
@@ -259,21 +260,31 @@ export default function ChatInterface({ threadId }: ChatInterfaceProps) {
           return (
             <div
               key={message.id}
-              className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
+              className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-6`}
             >
-              <div
-                className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                  isOwn
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-gray-200 text-gray-900'
-                }`}
-              >
-                <p className="text-sm">{message.body}</p>
-                <p className={`text-xs mt-1 ${
-                  isOwn ? 'text-indigo-100' : 'text-gray-500'
-                }`}>
-                  {formatTime(message.createdAt)}
-                </p>
+              <div className={`flex items-start space-x-3 max-w-xs lg:max-w-md ${isOwn ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                {/* Аватар */}
+                <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-sm font-medium text-indigo-600">
+                    {isOwn ? 'Я' : 'С'}
+                  </span>
+                </div>
+                
+                {/* Сообщение */}
+                <div
+                  className={`px-4 py-3 rounded-lg shadow-sm ${
+                    isOwn
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-white border border-gray-200 text-gray-900'
+                  }`}
+                >
+                  <p className="text-body-sm">{message.content}</p>
+                  <p className={`text-caption mt-2 ${
+                    isOwn ? 'text-indigo-100' : 'text-gray-500'
+                  }`}>
+                    {formatTime(message.createdAt)}
+                  </p>
+                </div>
               </div>
             </div>
           );
@@ -282,24 +293,24 @@ export default function ChatInterface({ threadId }: ChatInterfaceProps) {
       </div>
 
       {/* Поле ввода */}
-      <div className="p-4 border-t bg-white">
+      <div className="p-6 border-t bg-white">
         {error && (
-          <div className="mb-2 text-red-600 text-sm">{error}</div>
+          <div className="mb-3 text-red-600 text-body-sm">{error}</div>
         )}
-        <div className="flex space-x-2">
+        <div className="flex space-x-4">
           <textarea
             value={messageText}
             onChange={(e) => setMessageText(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Введите сообщение..."
-            className="flex-1 resize-none border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            className="form-textarea flex-1"
             rows={2}
             disabled={sending}
           />
           <button
             onClick={sendMessage}
             disabled={!messageText.trim() || sending}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn btn-primary btn-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {sending ? 'Отправка...' : 'Отправить'}
           </button>

@@ -19,10 +19,10 @@ const specialistSearchParamsSchema = z.object({
   priceMin: z.string().transform(Number).optional(),
   priceMax: z.string().transform(Number).optional(),
   q: z.string().optional(),
-  verifiedOnly: z.string().transform(val => val === 'true').default('true'),
+  verifiedOnly: z.string().transform(val => val === 'true').default(true),
   sort: z.enum(['recent', 'price_asc', 'price_desc']).default('recent'),
-  limit: z.string().transform(Number).default('20'),
-  offset: z.string().transform(Number).default('0'),
+  limit: z.string().transform(Number).default(20),
+  offset: z.string().transform(Number).default(0),
 });
 
 // Функция для получения данных специалистов через Prisma
@@ -276,9 +276,9 @@ export default function SpecialistsPage({
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">
+          <h1 className="text-heading-1 mb-8">
             Каталог специалистов
           </h1>
 
@@ -286,7 +286,7 @@ export default function SpecialistsPage({
           <SpecialistsFilters />
 
           {/* Результаты */}
-          <div className="bg-white rounded-lg shadow">
+          <div className="card-elevated">
             <Suspense fallback={<SpecialistsListSkeleton />}>
               <SpecialistsList searchParams={searchParams} />
             </Suspense>

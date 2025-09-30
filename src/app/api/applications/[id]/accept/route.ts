@@ -61,7 +61,7 @@ export async function POST(
       // Обновляем статус заявки
       await tx.request.update({
         where: { id: application.request.id },
-        data: { status: 'MATCHED' }
+        data: { status: 'IN_PROGRESS' }
       });
 
       // Ищем существующий чат или создаем новый
@@ -86,6 +86,11 @@ export async function POST(
 
       return chatThread.id;
     });
+
+    // Отправляем уведомление специалисту через Socket.IO
+    if ((global as any).emitThreadUpdated) {
+      (global as any).emitThreadUpdated(result, null, 0);
+    }
 
     return NextResponse.json({
       threadId: result

@@ -65,7 +65,7 @@ export default function StartChatButton({ specialistId, requestId }: StartChatBu
       <button
         onClick={handleStartChat}
         disabled={loading || status === 'loading'}
-        className="w-full bg-indigo-600 text-white px-4 sm:px-6 py-3 rounded-md text-base sm:text-lg font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="w-full btn btn-primary btn-lg disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading ? 'Создание чата...' : 
          status === 'loading' ? 'Загрузка...' :

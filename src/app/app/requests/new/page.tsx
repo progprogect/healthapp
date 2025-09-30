@@ -249,7 +249,7 @@ export default function NewRequestPage() {
                     type="number"
                     id="budgetMin"
                     value={formData.budgetMinCents ? formData.budgetMinCents / 100 : ''}
-                    onChange={(e) => handleInputChange('budgetMinCents', e.target.value ? Number(e.target.value) * 100 : undefined)}
+                    onChange={(e) => handleInputChange('budgetMinCents', e.target.value ? Number(e.target.value) * 100 : 0)}
                     placeholder="0"
                     min="0"
                     className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
@@ -265,7 +265,7 @@ export default function NewRequestPage() {
                     type="number"
                     id="budgetMax"
                     value={formData.budgetMaxCents ? formData.budgetMaxCents / 100 : ''}
-                    onChange={(e) => handleInputChange('budgetMaxCents', e.target.value ? Number(e.target.value) * 100 : undefined)}
+                    onChange={(e) => handleInputChange('budgetMaxCents', e.target.value ? Number(e.target.value) * 100 : 0)}
                     placeholder="0"
                     min="0"
                     className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${

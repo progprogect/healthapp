@@ -18,9 +18,16 @@ export default function Header() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(false);
 
-  // Загружаем информацию о профилях пользователя
+  // Используем профили из сессии (кэшированные)
   useEffect(() => {
-    if (session?.user?.id) {
+    if (session?.user?.profiles) {
+      setUserProfile({
+        hasClientProfile: session.user.profiles.hasClient,
+        hasSpecialistProfile: session.user.profiles.hasSpecialist
+      });
+      setLoadingProfile(false);
+    } else if (session?.user?.id) {
+      // Fallback: загружаем из API если профили не в сессии
       setLoadingProfile(true);
       fetch('/api/me/profile-info')
         .then(res => res.json())
@@ -37,7 +44,7 @@ export default function Header() {
     } else {
       setUserProfile(null);
     }
-  }, [session?.user?.id]);
+  }, [session?.user?.id, session?.user?.profiles]);
 
   const handleBecomeSpecialist = async () => {
     try {
@@ -163,3 +170,4 @@ export default function Header() {
     </header>
   );
 }
+

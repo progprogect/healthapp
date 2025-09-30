@@ -10,9 +10,9 @@ const getRequestsFeedSchema = z.object({
   format: z.enum(['online', 'offline', 'any']).optional(),
   city: z.string().optional(),
   q: z.string().optional(),
-  status: z.enum(['open', 'matched', 'closed', 'cancelled']).default('open'),
-  limit: z.string().transform(Number).default('20'),
-  offset: z.string().transform(Number).default('0'),
+  status: z.enum(['OPEN', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']).default('OPEN'),
+  limit: z.string().transform(Number).default(20),
+  offset: z.string().transform(Number).default(0),
 });
 
 // GET /api/requests/feed - лента заявок для специалистов
@@ -42,6 +42,20 @@ export async function GET(request: Request) {
     const params = Object.fromEntries(searchParams.entries());
     const { category, format, city, q, status, limit, offset } = getRequestsFeedSchema.parse(params);
 
+    // Получаем профиль специалиста для умной сортировки
+    const specialistProfile = await prisma.specialistProfile.findUnique({
+      where: { userId: user.id },
+      include: {
+        user: {
+          include: {
+            specialistCategories: {
+              include: { category: true }
+            }
+          }
+        }
+      }
+    });
+
     // Строим условие для фильтрации
     const whereCondition: any = {
       status: status.toUpperCase() as any
@@ -51,6 +65,12 @@ export async function GET(request: Request) {
     if (category) {
       whereCondition.category = {
         slug: category
+      };
+    } else if (specialistProfile?.user.specialistCategories.length) {
+      // Если категория не указана, показываем только заявки в категориях специалиста
+      const specialistCategoryIds = specialistProfile.user.specialistCategories.map(sc => sc.categoryId);
+      whereCondition.categoryId = {
+        in: specialistCategoryIds
       };
     }
 
@@ -108,34 +128,91 @@ export async function GET(request: Request) {
       }
     }
 
+    // Определяем умную сортировку
+    const orderBy: any[] = [];
+    
+    if (specialistProfile) {
+      // Приоритет 1: заявки в городе специалиста (если указан город)
+      if (specialistProfile.city) {
+        orderBy.push({
+          city: {
+            sort: 'asc',
+            nulls: 'last'
+          }
+        });
+      }
+      
+      // Приоритет 2: заявки с большим бюджетом
+      orderBy.push({
+        budgetMaxCents: {
+          sort: 'desc',
+          nulls: 'last'
+        }
+      });
+    }
+    
+    // Приоритет 3: новые заявки
+    orderBy.push({ createdAt: 'desc' });
+
     // Получаем заявки
     const requests = await prisma.request.findMany({
       where: whereCondition,
       include: {
         category: true
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: orderBy,
       skip: Number(offset),
       take: Number(limit)
     });
 
-    // Преобразуем в формат ответа
-    const items = requests.map(req => ({
-      id: req.id,
-      title: req.title,
-      description: req.description,
-      preferredFormat: req.preferredFormat,
-      city: req.city,
-      budgetMinCents: req.budgetMinCents,
-      budgetMaxCents: req.budgetMaxCents,
-      status: req.status,
-      category: {
-        slug: req.category.slug,
-        name: req.category.name
-      },
-      createdAt: req.createdAt?.toISOString() || new Date().toISOString(),
-      updatedAt: req.updatedAt?.toISOString() || new Date().toISOString()
-    }));
+    // Преобразуем в формат ответа с информацией о релевантности
+    const items = requests.map(req => {
+      let relevanceScore = 0;
+      let relevanceReasons: string[] = [];
+      
+      if (specialistProfile) {
+        // Проверяем соответствие города
+        if (specialistProfile.city && req.city === specialistProfile.city) {
+          relevanceScore += 3;
+          relevanceReasons.push('В вашем городе');
+        }
+        
+        // Проверяем соответствие бюджета
+        if (specialistProfile.priceMinCents && req.budgetMinCents && 
+            req.budgetMinCents >= specialistProfile.priceMinCents) {
+          relevanceScore += 2;
+          relevanceReasons.push('Подходящий бюджет');
+        }
+        
+        // Проверяем категорию специалиста
+        const isSpecialistCategory = specialistProfile.user.specialistCategories.some(
+          sc => sc.categoryId === req.categoryId
+        );
+        if (isSpecialistCategory) {
+          relevanceScore += 1;
+          relevanceReasons.push('Ваша категория');
+        }
+      }
+      
+      return {
+        id: req.id,
+        title: req.title,
+        description: req.description,
+        preferredFormat: req.preferredFormat.toLowerCase() as 'online' | 'offline' | 'any',
+        city: req.city,
+        budgetMinCents: req.budgetMinCents,
+        budgetMaxCents: req.budgetMaxCents,
+        status: req.status,
+        category: {
+          slug: req.category.slug,
+          name: req.category.name
+        },
+        createdAt: req.createdAt?.toISOString() || new Date().toISOString(),
+        updatedAt: req.createdAt?.toISOString() || new Date().toISOString(), // Use createdAt as updatedAt since updatedAt is not in the query
+        relevanceScore,
+        relevanceReasons
+      };
+    });
 
     const total = await prisma.request.count({ where: whereCondition });
 
@@ -145,7 +222,7 @@ export async function GET(request: Request) {
     console.error('Error fetching requests feed:', error);
     
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid request parameters', details: error.errors }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid request parameters', details: error.issues }, { status: 400 });
     }
     
     // Обрабатываем ошибки авторизации

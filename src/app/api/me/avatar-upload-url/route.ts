@@ -5,9 +5,7 @@ import { createId } from '@paralleldrive/cuid2';
 
 // Схема валидации для запроса upload URL
 const uploadUrlSchema = z.object({
-  contentType: z.enum(['image/jpeg', 'image/png', 'image/webp'], {
-    errorMap: () => ({ message: 'Поддерживаются только JPEG, PNG и WebP изображения' })
-  }),
+  contentType: z.enum(['image/jpeg', 'image/png', 'image/webp']),
   size: z.number().min(1, 'Размер файла должен быть больше 0').max(2 * 1024 * 1024, 'Размер файла не должен превышать 2MB')
 });
 
@@ -39,7 +37,7 @@ export async function POST(request: Request) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ 
         error: 'Validation error', 
-        details: error.errors.map(err => ({
+        details: error.issues.map(err => ({
           field: err.path.join('.'),
           message: err.message
         }))
@@ -55,3 +53,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
   }
 }
+

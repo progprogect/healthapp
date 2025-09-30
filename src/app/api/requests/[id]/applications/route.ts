@@ -83,7 +83,7 @@ export async function POST(
     if (error instanceof z.ZodError) {
       return NextResponse.json({ 
         error: 'Ошибка валидации', 
-        details: error.errors.map(err => ({
+        details: error.issues.map(err => ({
           field: err.path.join('.'),
           message: err.message
         }))

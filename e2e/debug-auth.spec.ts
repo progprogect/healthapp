@@ -24,3 +24,4 @@ test('debug auth', async ({ page }) => {
   // Take screenshot for debugging
   await page.screenshot({ path: 'debug-auth.png' });
 });
+
